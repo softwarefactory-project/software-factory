@@ -208,10 +208,6 @@ EOF
 
     # Quick and dirty fix for the current issue on RDO 20170223
     install_packages ${dir} python2-passlib-1.6.5
-
-    # install zuul_swift_upload.py
-    http_fetch $ZUUL_SWIFT_UPLOAD_URL ${dir}/usr/local/bin/zuul_swift_upload.py
-    chmod +x ${dir}/usr/local/bin/zuul_swift_upload.py
 }
 
 install_edeploy() {

@@ -1,28 +1,4 @@
 ---
-- name: Create /var/www/cauth
-  file:
-      path: /var/www/cauth
-      state: directory
-      owner: apache
-      group: apache
-      mode: 0750
-      setype: httpd_sys_content_t
-
-- name: "Copy app.wsgi"
-  copy: src=app.wsgi dest=/var/www/cauth/app.wsgi
-
-- name: Create /var/lib/cauth directory
-  file: path=/var/lib/cauth state=directory owner=apache group=apache mode=0750
-
-- name: Create /var/lib/cauth/templates directory
-  file: path=/var/lib/cauth/templates state=directory owner=apache group=apache mode=0750
-
-- name: Create /var/lib/cauth/keys directory
-  file: path=/var/lib/cauth/keys state=directory owner=root group=root mode=0755
-
-- name: Create /var/log/cauth
-  file: path=/var/log/cauth state=directory owner=apache group=apache mode=0750
-
 - name: Hash admin password
   shell: python <<<"{{hash_code}}'{{authentication.admin_password}}'{{hash_code_end}}"
   register: admin_password_hashed
@@ -31,26 +7,32 @@
   shell: python <<<"{{hash_code}}'{{sf_service_user_password}}'{{hash_code_end}}"
   register: service_user_password_hashed
 
-- name: Install cauth config.py
-  template: src=templates/config.py.j2 dest=/var/www/cauth/config.py
+- name: Install cauth config files
+  template:
+      src: "{{ item.name }}.j2"
+      dest: "{{ item.dest }}/{{ item.name }}"
+      mode: 0444
+      owner: apache
+      group: apache
   notify: apache reload
+  with_items:
+      - {name: config.py, dest: /etc/cauth}
+      - {name: login.html, dest: /etc/cauth/templates}
 
-- name: Create /var/www/cauth/templates
-  file: path=/var/www/cauth/templates state=directory
-
-- name: Install login.html
-  template: src=login.html.j2 dest=/var/www/cauth/templates/login.html
-
-- name: Install auth site
+- name: Install cauth files
   copy:
-    src: files/cauth.site
-    dest: /etc/httpd/conf.d/cauth.conf
+      src: "{{ item.name }}"
+      dest: "{{ item.dest }}/{{ item.real_name | default(item.name) }}"
+  notify: apache reload
+  with_items:
+      - {name: cauth.site, real_name: cauth.conf, dest: /etc/httpd/conf.d/}
+      - {name: app.wsgi, dest: /var/www/cauth/}
 
 - name: Install cauth private key
   copy:
-    content: "{{ cauth_privkey }}"
-    dest: /srv/cauth_keys/privkey.pem
-    owner: root
-    group: apache
-    mode: 0440
-    setype: httpd_sys_content_t
+      content: "{{ cauth_privkey }}"
+      dest: /var/lib/cauth/keys/privkey.pem
+      owner: root
+      group: apache
+      mode: 0440
+      setype: httpd_sys_content_t

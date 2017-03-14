@@ -1,0 +1,61 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Destroy instances
+        os_server:
+          cloud: '{{ pre_upgrade_cloud }}'
+          state: absent
+          name: '{{ item.fqdn }}'
+        with_items: '{{ instances }}'
+
+      - name: Cleanup ports
+        os_port:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          network: '{{ private_network }}'
+          state: absent
+        with_items: '{{ instances }}'
+
+      - name: Get snapshot names
+        shell: "OS_CLOUD=sf-pre-upgrade openstack volume snapshot list | awk '/{{ item.fqdn }}/ {print $2}'"
+        with_items: '{{ instances }}'
+        register: snapshots
+
+      - name: Create volume from snapshot
+        os_volume:
+          cloud: '{{ pre_upgrade_cloud }}'
+          state: present
+          size: '{{ volume_size }}'
+          display_name: '{{ item.item.fqdn }}'
+          snapshot_id: '{{ item.stdout }}'
+        with_items: '{{ snapshots.results }}'
+
+      - name: Create fixed ip addr
+        os_port:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          network: '{{ private_network }}'
+          security_groups: '{{ project }}'
+          fixed_ips:
+            - ip_address: '{{ item.fixed_private_ip }}'
+        with_items: '{{ instances }}'
+
+      - name: Create instances
+        os_server:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          boot_volume: '{{ item.fqdn }}'
+          key_name: '{{ project }}'
+          flavor: '{{ flavor }}'
+          floating_ips: '{{ item.floating_ips }}'
+          terminate_volume: yes
+          security_groups: '{{ project }}'
+          nics: "port-name={{ item.fqdn }}"
+        with_items: '{{ instances }}'
+
+      - name: Wait for ssh services for all instances
+        wait_for:
+          host: '{{ item.floating_ips }}'
+          port: 22
+        with_items: '{{ instances }}'

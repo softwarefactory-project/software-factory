@@ -1,0 +1,39 @@
+---
+- hosts: sf-pre-upgrade
+  tasks:
+      - name: Install python and python2-dnf packages
+        shell: "dnf install -y python python2-dnf"
+        args:
+            warn: false
+        become: true
+
+      - name: Install rdo repositories package
+        package:
+            name: "{{ rdo_release_rpm }}"
+        become: true
+
+      - name: Install packages
+        package:
+            name: "{{ item }}"
+        with_items: "{{ sf_pre_upgrade_packages }}"
+        become: true
+
+      - name: Create config for ssh
+        blockinfile:
+            # TODO use path for ansible 2.3
+            # path: /home/fedora/.ssh/config
+            dest: /home/fedora/.ssh/config
+            owner: fedora
+            group: fedora
+            mode: 0600
+            create: yes
+            block: |
+                Host managesf.softwarefactory-project.io
+                    Hostname 46.231.133.250
+                Host elk.softwarefactory-project.io
+                    Hostname 46.231.133.251
+                Host *
+                    User root
+                    UserKnownHostsFile /dev/null
+                    StrictHostKeyChecking no
+                    LogLevel Error

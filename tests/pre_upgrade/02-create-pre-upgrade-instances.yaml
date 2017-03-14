@@ -1,0 +1,96 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Create ssh key for current user
+        user:
+            name: fedora
+            generate_ssh_key: yes
+            ssh_key_bits: 2048
+            ssh_key_file: /home/fedora/.ssh/id_rsa
+
+- hosts: localhost
+  gather_facts: no
+  vars:
+      id_rsa_pub: "{{ lookup('file', '/home/fedora/.ssh/id_rsa.pub') }}"
+  tasks:
+      - name: Check if SF stable image exist locally
+        stat:
+            path: '/tmp/{{ sf_image_name }}'
+        register: image
+
+      - name: Download SF stable
+        get_url:
+            url: '{{ sf_image_url }}'
+            dest: /tmp
+        when: image.stat.exists == False
+
+      - name: Upload SF stable image
+        os_image:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name:  'sf-{{ sf_release }}'
+            filename: '/tmp/{{ sf_image_name }}'
+
+      - name: Destroy old instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            state: absent
+            name: '{{ item.hostname }}'
+        with_items: '{{ instances }}'
+
+      - name: Cleanup old ports
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            network: '{{ private_network }}'
+            state: absent
+        with_items: '{{ instances }}'
+
+      - name: Create fixed ip addr
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            network: '{{ private_network }}'
+            security_groups: '{{ project }}'
+            fixed_ips:
+                - ip_address: '{{ item.fixed_private_ip }}'
+        with_items: '{{ instances }}'
+
+      - name: Create instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            image: 'sf-{{ sf_release }}'
+            boot_from_volume: yes
+            key_name: '{{ project }}'
+            flavor: '{{ item.flavor }}'
+            floating_ips: '{{ item.floating_ips }}'
+            terminate_volume: yes
+            security_groups: '{{ project }}'
+            nics: 'port-name={{ item.hostname }}'
+            userdata: |
+              #cloud-config
+              fqdn: {{ item.hostname }}
+              users:
+                - default
+                - name: root
+                  ssh-authorized-keys:
+                    - '{{ id_rsa_pub }}'
+        with_items: '{{ instances }}'
+
+#      - name: Clone software-factory project
+#        git:
+#            repo: https://softwarefactory-project.io/r/software-factory/software-factory
+#            dest: /var/lib/software-factory
+#            version: '{{ sf_release }}'
+#
+#      - name: Fetch software-factory images
+#        shell: ./fetch_image.sh
+#        args:
+#            chdir: /var/lib/software-factory
+#
+#      - name: Wait for ssh services on all servers
+#        wait_for:
+#          host: '{{ item.floating_ips }}'
+#          port: 22
+#        with_items: '{{ instances }}'

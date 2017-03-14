@@ -1,0 +1,40 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Destroy instances
+        os_server:
+          cloud: '{{ pre_upgrade_cloud }}'
+          state: absent
+          name: '{{ item.fqdn }}'
+        with_items: '{{ instances }}'
+
+      - name: Cleanup ports
+        os_port:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          network: '{{ private_network }}'
+          state: absent
+        with_items: '{{ instances }}'
+
+      - name: Get volume snapshot id
+        shell: "OS_CLOUD=sf-pre-upgrade openstack volume snapshot list | awk '/available/ {print $2}'"
+        register: snapshots
+
+      - name: Delete volume snapshots
+        shell: 'OS_CLOUD=sf-pre-upgrade openstack volume snapshot delete {{ item }}'
+        with_items: '{{ snapshots.stdout_lines }}'
+
+      - name: Get volume id
+        shell: "OS_CLOUD=sf-pre-upgrade openstack volume list | awk '/available/ {print $2}'"
+        register: volumes
+
+      - name: Delete volumes
+        shell: 'OS_CLOUD=sf-pre-upgrade openstack volume delete {{ item }}'
+        with_items: '{{ volumes.stdout_lines }}'
+
+      - name: Upload SF image
+        os_image:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name:  'sf-{{ sf_release }}'
+          state: absent

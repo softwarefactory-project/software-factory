@@ -1,0 +1,48 @@
+---
+# to prepare sf-pre-upgrade instance
+rdo_base_url: https://repos.fedorapeople.org/repos/openstack
+rdo_release: ocata
+rdo_release_version: 2
+rdo_release_rpm: "{{ rdo_base_url }}/openstack-{{ rdo_release }}/rdo-release-{{ rdo_release }}-{{ rdo_release_version }}.noarch.rpm"
+sf_pre_upgrade_packages:
+    - ansible
+    - gnupg
+    - git
+    - git-review
+    - libselinux-python
+    - python2-os-client-config
+    - python2-shade
+    - tmux
+    - vim-enhanced
+
+sf_image_name: "softwarefactory-C7.0-{{ sf_release }}.img.qcow2"
+sf_image_url: "http://46.231.132.68:8080/v1/AUTH_b50e80d3969f441a8b7b1fe831003e0a/sf-images/{{ sf_image_name }}"
+data_dir: /home/fedora/data
+
+project: sf-pre-upgrade
+pre_upgrade_cloud: sf-pre-upgrade
+public_network: public
+private_network: private
+cidr: '192.168.240.0/24'
+sf_instance: managesf.softwarefactory-project.io
+elk_instance: elk.softwarefactory-project.io
+volume_size: 160
+flavor: 5
+domain: softwarefactory-project.io
+sf_instance_floating: 46.231.133.250
+sf_pre_upgrade_manager_floating: 46.231.133.58
+
+egress_ports: [{min_port: 53, protocol: udp}]
+ingress_ports: [{min_port: 22},
+                {min_port: 80},
+                {min_port: 443}]
+
+
+instances: [{fqdn: '{{ sf_instance }}',
+             hostname: managesf,
+             fixed_private_ip: 192.168.240.5,
+             floating_ips: '{{ sf_instance_floating }}'},
+             {fqdn: '{{ elk_instance }}',
+             hostname: elk,
+             fixed_private_ip: 192.168.240.6,
+             floating_ips: 46.231.133.251}]

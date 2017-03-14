@@ -1,0 +1,211 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Create ssh key for current user
+        user:
+          name: fedora
+          generate_ssh_key: yes
+          ssh_key_bits: 2048
+          ssh_key_file: /home/fedora/.ssh/id_rsa
+
+- hosts: localhost
+  gather_facts: no
+  vars:
+      id_rsa_pub: "{{ lookup('file', '/home/fedora/.ssh/id_rsa.pub') }}"
+  tasks:
+      - name: Check if SF stable image exist locally
+        stat:
+          path: '/{{ data_dir }}/{{ sf_image_name }}'
+        register: image
+
+      - name: Download SF stable
+        get_url:
+          url: '{{ sf_image_url }}'
+          dest: '/{{ data_dir }}'
+        when: image.stat.exists == False
+
+      - name: Upload SF stable image
+        os_image:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name:  'sf-{{ sf_release }}'
+          filename: '/{{ data_dir }}/{{ sf_image_name }}'
+
+      - name: Clone software-factory project
+        git:
+            repo: https://softwarefactory-project.io/r/software-factory/software-factory
+            dest: '/{{ data_dir }}/software-factory'
+            version: '{{ sf_next_release }}'
+
+      - name: Fetch next software-factory image
+        shell: ./fetch_image.sh
+        args:
+            chdir: '/{{ data_dir }}/software-factory'
+
+      - name: Create fixed ip addr
+        os_port:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          network: '{{ private_network }}'
+          security_groups: '{{ project }}'
+          fixed_ips:
+            - ip_address: '{{ item.fixed_private_ip }}'
+        with_items: '{{ instances }}'
+
+      - name: Create instances
+        os_server:
+          cloud: '{{ pre_upgrade_cloud }}'
+          name: '{{ item.fqdn }}'
+          image: 'sf-{{ sf_release }}'
+          boot_from_volume: yes
+          key_name: '{{ project }}'
+          flavor: '{{ flavor }}'
+          floating_ips: '{{ item.floating_ips }}'
+          terminate_volume: yes
+          security_groups: '{{ project }}'
+          nics: 'port-name={{ item.fqdn }}'
+          volume_size: '{{ volume_size }}'
+          userdata: |
+            #cloud-config
+            hostname: '{{ item.hostname }}'
+            fqdn: '{{ item.fqdn }}'
+            users:
+              - name: root
+                ssh-authorized-keys:
+                  - '{{ id_rsa_pub }}'
+            runcmd:
+              - hostnamectl set-hostname '{{ item.fqdn }}'
+              - hostnamectl set-hostname --transient '{{ item.fqdn }}'
+              - /usr/bin/sed  -i "s/\(127.0.0.1\)[[:space:]]*\(localhost.*\)/\1 {{ item.fqdn }} {{ item.hostname }} \2/" /etc/hosts
+        with_items: '{{ instances }}'
+
+      - name: Wait for ssh services for all instances
+        wait_for:
+          host: '{{ item.floating_ips }}'
+          port: 22
+        with_items: '{{ instances }}'
+
+      - name: Extract root ssh key from archive
+        shell: tar xf sf_backup.tar.gz ./install-server/var/lib/software-factory/bootstrap-data/ssh_keys/*
+        args:
+          chdir: '{{ data_dir }}'
+
+      - name: Copy keys to local dir
+        copy:
+          src: "{{ data_dir }}/install-server/var/lib/software-factory/bootstrap-data/ssh_keys/"
+          dest: '{{ data_dir }}/ssh_keys/'
+
+- hosts: elk.softwarefactory-project.io
+  gather_facts: no
+  vars:
+      service_rsa_pub: "{{ lookup('file', '{{ data_dir }}/ssh_keys/service_rsa.pub') }}"
+  tasks:
+      - name: Copy ssh public key to elk.softwarefactory-project.io
+        lineinfile:
+          # TODO: use path with ansible 2.3
+          #path: /root/.ssh/authorized_keys
+          dest: /root/.ssh/authorized_keys
+          line: '{{ service_rsa_pub }}'
+
+- hosts: managesf.softwarefactory-project.io
+  gather_facts: no
+  tasks:
+      - name: Copy backup to sfmanager host
+        copy:
+          src: '{{ data_dir }}/sf_backup.tar.gz'
+          dest: /root/sf_backup.tar.gz
+
+      - name: Copy arch.yaml
+        copy:
+          src: '{{ data_dir }}/arch.yaml'
+          dest: /etc/software-factory/arch.yaml
+
+      - name: Prepare sfconfig.yaml
+        lineinfile:
+          # TODO: use path with ansible 2.3
+          #path: /etc/software-factory/sfconfig.yaml
+          dest: /etc/software-factory/sfconfig.yaml
+          regexp: '^fqdn: sftests.com'
+          insertafter: '^## fqdn of the deployment.*'
+          line: 'fqdn: {{ domain }}'
+
+      - name: Copy ssh keys
+        copy:
+          src: '{{ data_dir }}/ssh_keys/'
+          dest: /var/lib/software-factory/bootstrap-data/ssh_keys/
+          mode: 0600
+
+      - name: Create log directory
+        file:
+          path: /var/log/software-factory
+          state: directory
+          mode: 0700
+
+      - name: Install SF
+        shell: sfconfig.py > /var/log/software-factory/sfconfig-install.log
+
+      - name: Remove sfconfig.py run from restore command
+        command: sed -i '/# Call sfconfig/,$d' /etc/ansible/sf_restore.yml
+
+      - name: Launch restore command (without sfconfig.py)
+        command: ansible-playbook -vv -e "backup_file=/root/sf_backup.tar.gz" /etc/ansible/sf_restore.yml
+
+      - name: Ensure lecm is disabled
+        shell: sed -i 's/\(  use_letsencrypt:\).*/\1 false/' /etc/software-factory/sfconfig.yaml
+
+      - name: cleanup ssh_known_hosts
+        shell: echo > /root/.ssh/known_hosts
+
+      - name: Run final sfconfig.py
+        shell: sfconfig.py > /var/log/software-factory/sfconfig-restore.log
+
+      - name: Remove old software-factory directory
+        file:
+          path: /root/software-factory
+          state: absent
+        tags: current
+
+      - name: Copy data directories
+        copy:
+          src: '{{ item.src }}'
+          dest: '{{ item.dest | default(item.src) }}'
+          owner: root
+          group: root
+        with_items:
+            - {src: '{{ data_dir }}/software-factory/', dest: '/root/software-factory/'}
+            - {src: '/var/lib/sf/'}
+        tags: current
+
+
+- hosts: localhost
+  gather_facts: no
+  tags: current
+  tasks:
+      - name: Stop instances
+        os_server_actions:
+          cloud: '{{ pre_upgrade_cloud }}'
+          action: stop
+          server: '{{ item.fqdn }}'
+        with_items: '{{ instances }}'
+
+      - name: Get volumes id
+        shell: OS_CLOUD=sf-pre-upgrade openstack volume list | awk '/{{ item.fqdn }}/ {print $2}'
+        with_items: '{{ instances }}'
+        register: volumes
+
+      - name: Create volume snapshots
+        shell: 'OS_CLOUD=sf-pre-upgrade openstack volume snapshot create --volume {{ item.stdout }} {{ item.item.fqdn }} --force'
+        with_items: "{{ volumes.results }}"
+
+      - name: Start instances
+        os_server_actions:
+          cloud: '{{ pre_upgrade_cloud }}'
+          action: start
+          server: '{{ item.fqdn }}'
+        with_items: '{{ instances }}'
+
+      - name: Wait for ssh services for all instances
+        wait_for:
+          host: '{{ item.floating_ips }}'
+          port: 22
+        with_items: '{{ instances }}'

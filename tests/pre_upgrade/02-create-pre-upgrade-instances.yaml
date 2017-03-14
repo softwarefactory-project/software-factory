@@ -1,0 +1,156 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Create ssh key for current user
+        user:
+            name: fedora
+            generate_ssh_key: yes
+            ssh_key_bits: 2048
+            ssh_key_file: /home/fedora/.ssh/id_rsa
+
+- hosts: localhost
+  gather_facts: no
+  vars:
+      id_rsa_pub: "{{ lookup('file', '/home/fedora/.ssh/id_rsa.pub') }}"
+  tasks:
+      - name: Check if SF stable image exist locally
+        stat:
+            path: '/tmp/{{ sf_image_name }}'
+        register: image
+
+      - name: Download SF stable
+        get_url:
+            url: '{{ sf_image_url }}'
+            dest: /tmp
+        when: image.stat.exists == False
+
+      - name: Upload SF stable image
+        os_image:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name:  'sf-{{ sf_release }}'
+            filename: '/tmp/{{ sf_image_name }}'
+
+      - name: Destroy old instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            state: absent
+            name: '{{ item.fqdn }}'
+        with_items: '{{ instances }}'
+
+      - name: Cleanup old ports
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.fqdn }}'
+            network: '{{ private_network }}'
+            state: absent
+        with_items: '{{ instances }}'
+
+      - name: Create fixed ip addr
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.fqdn }}'
+            network: '{{ private_network }}'
+            security_groups: '{{ project }}'
+            fixed_ips:
+                - ip_address: '{{ item.fixed_private_ip }}'
+        with_items: '{{ instances }}'
+
+      - name: Create instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.fqdn }}'
+            image: 'sf-{{ sf_release }}'
+            boot_from_volume: yes
+            key_name: '{{ project }}'
+            flavor: '{{ item.flavor }}'
+            floating_ips: '{{ item.floating_ips }}'
+            terminate_volume: yes
+            security_groups: '{{ project }}'
+            nics: 'port-name={{ item.fqdn }}'
+            volume_size: '{{ item.volume_size }}'
+            userdata: |
+              #cloud-config
+              hostname: '{{ item.hostname }}'
+              fqdn: '{{ item.fqdn }}'
+              users:
+                - name: root
+                  ssh-authorized-keys:
+                    - '{{ id_rsa_pub }}'
+              runcmd:
+                - hostnamectl set-hostname '{{ item.fqdn }}'
+                - hostnamectl set-hostname --transient '{{ item.fqdn }}'
+                - /usr/bin/sed  -i "s/\(127.0.0.1\)[[:space:]]*\(localhost.*\)/\1 {{ item.fqdn }} {{ item.hostname }} \2/" /etc/hosts
+        with_items: '{{ instances }}'
+
+#      TODO: use sfmanager to get backup
+#      - name: Get last backup name
+#        shell: OS_CLOUD=sf-prod openstack object list sfbackups -f value -c Name
+#        register: backups
+#
+#      - name: Check if SF stable image exist locally
+#        stat:
+#            path: '/tmp/{{ backups.stdout_lines[-1] }}'
+#        register: backup_file
+#
+#      - name: Download last backup
+#        shell: "OS_CLOUD=sf-prod openstack object save sfbackups {{ backups.stdout_lines[-1] }}"
+#        args:
+#            chdir: /tmp
+#        when: backup_file.stat.exists == False
+
+      - name: Wait for ssh services on all servers
+        wait_for:
+          host: '{{ item.floating_ips }}'
+          port: 22
+        with_items: '{{ instances }}'
+
+- hosts: managesf.softwarefactory-project.io
+  gather_facts: no
+  tasks:
+      - name: Copy backup to sfmanager host
+        copy:
+          src: /tmp/sf_backup.tar.gz
+          dest: /tmp/sf_backup.tar.gz
+
+      - name: Copy arch.yaml
+        copy:
+          src: /home/fedora/arch.yaml
+          dest: /etc/software-factory/arch.yaml
+
+      - name: Prepare sfconfig.yaml
+        lineinfile:
+            # TODO: use path with ansible 2.3
+            #path: /etc/software-factory/sfconfig.yaml
+            dest: /etc/software-factory/sfconfig.yaml
+            regexp: '^fqdn: sftests.com'
+            insertafter: '^## fqdn of the deployment.*'
+            line: 'fqdn: {{ sf_duplicate_instance }}'
+
+      - name: Install SF
+        shell: sfconfig.py
+        ignore_errors: true
+        no_log: true
+
+      - name: Get public key
+        fetch:
+            src: /root/.ssh/id_rsa.pub
+            dest: /tmp
+
+- hosts: elk.softwarefactory-project.io
+  gather_facts: no
+  vars:
+      managesf_id_rsa_pub: "{{ lookup('file', '/tmp/managesf.softwarefactory-project.io/root/.ssh/id_rsa.pub') }}"
+  tasks:
+      - name: Copy ssh key to elk.softwarefactory-project.io
+        lineinfile:
+            # TODO: use path with ansible 2.3
+            #path: /root/.ssh/authorized_keys
+            dest: /root/.ssh/authorized_keys
+            line: '{{ managesf_id_rsa_pub }}'
+
+- hosts: managesf.softwarefactory-project.io
+  gather_facts: no
+  tasks:
+      - name: Install SF
+        shell: sfconfig.py

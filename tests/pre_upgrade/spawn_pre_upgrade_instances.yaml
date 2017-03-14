@@ -1,0 +1,88 @@
+---
+- hosts: localhost
+  gather_facts: no
+  tasks:
+      - name: Destroy old instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            state: absent
+            name: '{{ item.hostname }}'
+        with_items: '{{ instances }}'
+
+      - name: Cleanup old ports
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            network: '{{ private_network }}'
+            state: absent
+        with_items: '{{ instances }}'
+
+      - name: Create volume from snapshot
+        os_volume:
+            cloud: '{{ pre_upgrade_cloud }}'
+            state: present
+            size: '{{ item.volume_size }}'
+            display_name: 'current-{{ item.hostname }}'
+            snapshot_id: '{{ item.snapshot_id }}'
+        with_items: '{{ instances }}'
+
+      - name: Create fixed ip addr
+        os_port:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            network: '{{ private_network }}'
+            security_groups: '{{ project }}'
+            fixed_ips:
+                - ip_address: '{{ item.fixed_private_ip }}'
+        with_items: '{{ instances }}'
+
+      - name: Create ssh keypair
+        os_keypair:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ project }}'
+            state: present
+            public_key_file: /root/.ssh/id_rsa.pub
+
+      - name: Create instance
+        os_server:
+            cloud: '{{ pre_upgrade_cloud }}'
+            name: '{{ item.hostname }}'
+            boot_volume: 'current-{{ item.hostname }}'
+            key_name: '{{ project }}'
+            flavor: '{{ item.flavor }}'
+            floating_ips: '{{ item.floating_ips }}'
+            terminate_volume: yes
+            security_groups: '{{ project }}'
+            nics: "port-name={{ item.hostname }}"
+        with_items: '{{ instances }}'
+
+      - name: Clone software-factory project
+        git:
+            repo: https://softwarefactory-project.io/r/software-factory/software-factory
+            dest: /var/lib/software-factory
+            version: '{{ sf_release }}'
+
+      - name: Fetch software-factory images
+        shell: ./fetch_image.sh
+        args:
+            chdir: /var/lib/software-factory
+
+      - name: Wait for ssh services on all servers
+        wait_for:
+          host: '{{ item.floating_ips }}'
+          port: 22
+        with_items: '{{ instances }}'
+
+#      currently, it's not possible to add an ssh key with cloud init when spanning instances
+#      due to cloud init configuration in our deployment
+      - name: Sync images and sf directory
+        shell: 'echo rsync -av  --delete {{ item }} centos@{{ sf_duplicate_instance_floating }}:'
+        with_items:
+            - '/var/lib/software-factory/'
+            - '/var/lib/sf/'
+
+#      - name: Deploy images and sf directory on remote host
+#        shell: 'ssh centos@{{ sf_duplicate_instance_floating }}: sudo mv {{ item.src }} {{ item.dst }}'
+#        with_items:
+#            - {src: 'software-factory', dst: '/root/'}
+#            - {src: 'sf', dst: '/var/lib/'}

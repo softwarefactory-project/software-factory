@@ -22,22 +22,13 @@ to adapt sfconfig.yaml. Below is an example of configuration.
 .. code-block:: yaml
 
  nodepool:
-   disabled: false
    providers:
-     - auth-url: http://localhost:5000/v2.0
-       boot-timeout: 120
-       # Max amount of Slaves that can be started
-       max-servers: 10
-       name: default
-       password: 'secret'
-       # Compute availability zone
-       pool: nova
-       project-id: 'tenantname'
-       # Dedicated instance network
-       network: 'neutron-network-uuid'
-       # Delay in seconds between two tasks within nodepool
-       rate: 10.0
+     - name: default
+       auth_url: http://localhost:5000/v2.0
+       project_id: 'tenantname'
        username: 'user'
+       password: 'secret'
+       region_name: ''
 
 To apply the configuration you need to run again the sfconfig.py script.
 

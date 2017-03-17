@@ -77,11 +77,6 @@ if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
     ETHERPAD_EXTRA_VARS+=", etherpad_version: \"${ETHERPAD_LITE_VERSION}\""
 fi
 
-# mirror2swift
-if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
-    MIRROR2SWIFT_EXTRA_VARS="mirror2swift_url: \"${SWIFT_CACHE}/mirror2swift.git\""
-fi
-
 # Influxdb
 if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
     INFLUXDB_EXTRA_VARS="influxdb_repo_url: \"http://46.231.132.68:8080/v1/AUTH_b50e80d3969f441a8b7b1fe831003e0a/repomirror/influxdb/\""

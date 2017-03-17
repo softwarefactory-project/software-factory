@@ -260,6 +260,7 @@ remove_obsolete() {
         do_chroot ${dir} rpm -evh software-factory-doc
     fi
     rm -Rf ${dir}/etc/yum.repos.d/sf-repos.repo ${dir}/etc/yum.repos.d/epel*.repo
+    rm -Rf ${dir}/usr/src/
 }
 
 fix_ansible_issue5504() {
@@ -268,8 +269,6 @@ fix_ansible_issue5504() {
 
 function install_sf_config {
     set -e
-
-    mkdir -p ${dir}/usr/src
 
     # Ensure sf-config is latest
     if do_chroot ${dir} rpm -q sf-config; then
@@ -352,7 +351,7 @@ build_all() {
     ansible_install sf-nodepool
     ansible_install sf-storyboard
     ansible_install sf-storyboard-webclient "${STORYBOARD_WEBCLIENT_EXTRA_VARS}"
-    ansible_install sf-mirror "${MIRROR2SWIFT_EXTRA_VARS}"
+    ansible_install sf-mirror
     ansible_install sf-elasticsearch "${ELASTICSEARCH_EXTRA_VARS}"
     ansible_install sf-logstash "${LOGSTASH_EXTRA_VARS}"
     ansible_install sf-kibana "${KIBANA_EXTRA_VARS}"

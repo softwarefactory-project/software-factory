@@ -1,0 +1,11 @@
+---
+- name: "Setup ochlero config"
+  template: src=ochlero.yaml.j2 dest=/etc/ochlero/ochlero.yaml
+  notify: [restart ochlero]
+
+- name: Start service
+  systemd:
+      name: ochlero
+      state: started
+      daemon_reload: yes
+      enabled: yes

@@ -30,6 +30,7 @@ inventory:
       - mosquitto
       - germqtt
       - repoxplorer
+      - ochlero
     mem: 8
     cpu: 4
     disk: 20

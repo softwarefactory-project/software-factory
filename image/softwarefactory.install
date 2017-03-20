@@ -370,6 +370,7 @@ build_all() {
     ansible_install sf-job-logs-gearman-worker
     ansible_install sf-repoxplorer
     ansible_install sf-germqtt
+    ansible_install sf-ochlero
     install_sf
     checkpoint "sf installed"
     do_chroot ${dir} yum update -y ${INSTALL_OPTIONS} --exclude="python2-passlib jenkins"

@@ -1,0 +1,24 @@
+---
+- include: /etc/ansible/tasks/create_user.yml user_name=ochlero
+
+- name: "Create directory"
+  file: path=/etc/ochlero owner=ochlero group=ochlero state=directory
+
+- name: "Setup ochlero config"
+  template: src=ochlero.yaml.j2 dest=/etc/ochlero/ochlero.yaml
+  notify: [restart ochlero]
+
+- name: Install service file
+  copy:
+      src: ochlero.service
+      dest: /lib/systemd/system/ochlero.service
+      owner: root
+      group: root
+      mode: 0644
+
+- name: Start service
+  systemd:
+      name: ochlero
+      state: started
+      daemon_reload: yes
+      enabled: yes

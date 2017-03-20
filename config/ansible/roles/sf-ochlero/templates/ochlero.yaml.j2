@@ -1,0 +1,76 @@
+mqtt:
+  host: {{ mosquitto_host }}
+  port: 1883
+  auth:
+    username: SF_SERVICE_USER
+    password: {{ sf_service_user_password }}
+watchers:
+{% if 'nodepool' in roles %}
+  - unit: nodepool.service
+    topic: nodepool
+    events:
+      - name: node_create_start
+        pattern: ".*Creating server with hostname ${HOSTNAME} in ${PROVIDER} from image ${IMAGE} for node id: ${NODE_ID}"
+        where:
+          HOSTNAME: ".+"
+          PROVIDER: ".+"
+          IMAGE: ".+"
+          NODE_ID: "[0-9]+"
+        publish: '{"STATUS": "CREATE", "HOSTNAME": "${HOSTNAME}", "IMAGE": "${IMAGE}, "PROVIDER": "${PROVIDER}", "NODE_ID": "$NODE_ID"}'
+      - name: node_ready
+        pattern: ".*Node id: ${NODE_ID} is ready"
+        where:
+          NODE_ID: "[0-9]+"
+        publish: '{"STATUS": "READY", "NODE_ID": "$NODE_ID"}'
+      - name: node_ready_orchestrator
+        pattern: ".*Node id: ${NODE_ID} added to ${ORCHESTRATOR}"
+        where:
+          NODE_ID: "[0-9]+"
+          ORCHESTRATOR: ".+"
+        publish: '{"STATUS": "READY_ORCHESTRATOR", "NODE_ID": "$NODE_ID", "ORCHESTRATOR": "${ORCHESTRATOR}"}'
+      - name: node_deleted
+        pattern: ".*Deleted node id: ${NODE_ID}"
+        where:
+          NODE_ID: "[0-9]+"
+        publish: '{"STATUS": "DELETED", "NODE_ID": "$NODE_ID"}'
+      - name: node_deleted_orchestrator
+        pattern: ".*Deleted ${ORCHESTRATOR} node id: ${NODE_ID}"
+        where:
+          NODE_ID: "[0-9]+"
+          ORCHESTRATOR: ".+"
+        publish: '{"STATUS": "DELETED_ORCHESTRATOR", "NODE_ID": "$NODE_ID", "ORCHESTRATOR": "${ORCHESTRATOR}"}'
+{% endif %}
+{% if 'zuul' in roles %}
+  - unit: zuul.service
+    topic: zuul
+    events:
+      - name: add_to_pipeline
+        pattern: ".*Adding ${ZUUL_PROJECT}, <Change .+ ${ZUUL_CHANGE},${ZUUL_PATCHSET}> to <Pipeline ${PIPELINE}>"
+        where:
+          ZUUL_PROJECT: ".+"
+          ZUUL_CHANGE: ".+"
+          ZUUL_PATCHSET: ".+"
+          PIPELINE: ".+"
+        publish: '{"EVENT": "ADD_TO_PIPELINE", "ZUUL_PROJECT": "${ZUUL_PROJECT}", "ZUUL_CHANGE_IDS": "${ZUUL_CHANGE},${ZUUL_PATCHSET}", "ZUUL_CHANGE": "${ZUUL_CHANGE}", "ZUUL_PATCHSET": "${ZUUL_PATCHSET}", "PIPELINE": "${PIPELINE}"}'
+      - name: launch_job
+        pattern: ".*Launch job ${JOB_NAME} \(uuid: ${ZUUL_UUID}\) for change <Change .+ ${ZUUL_CHANGE},${ZUUL_PATCHSET}> .+"
+        where:
+          JOB_NAME: ".+"
+          ZUUL_CHANGE: ".+"
+          ZUUL_PATCHSET: ".+"
+          ZUUL_UUID: ".+" 
+        publish: '{"EVENT": "LAUNCH_JOB", "ZUUL_CHANGE_IDS": "${ZUUL_CHANGE},${ZUUL_PATCHSET}", "ZUUL_CHANGE": "${ZUUL_CHANGE}", "ZUUL_PATCHSET": "${ZUUL_PATCHSET}", "ZUUL_UUID": "${ZUUL_UUID}", "JOB_NAME": "${JOB_NAME}"}'
+      - name: start_build
+        pattern: ".*Build .+ name: build:${JOB_NAME} unique: ${ZUUL_UUID}> started"
+        where:
+          JOB_NAME: ".+"
+          ZUUL_UUID: ".+"
+        publish: '{"EVENT": "START_BUILD", "ZUUL_UUID": "${ZUUL_UUID}", "JOB_NAME": "${JOB_NAME}"}'
+      - name: build_result
+        pattern: ".*Build .+ name: build:${JOB_NAME} unique: ${ZUUL_UUID}> complete, result ${RESULT}"
+        where:
+          JOB_NAME: ".+"
+          ZUUL_UUID: ".+"
+          RESULT: ".+"
+        publish: '{"EVENT": "BUILD_RESULT", "ZUUL_UUID": "${ZUUL_UUID}", "JOB_NAME": "${JOB_NAME}", "RESULT": "${RESULT}"}'
+{% endif %}

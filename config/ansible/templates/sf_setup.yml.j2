@@ -43,7 +43,7 @@
 {% for host in inventory %}
 - hosts: {{ host['hostname'] }}
   roles:
-{% for role in host['rolesname'] %}{% if role != 'sf-mysql' %}    - {name: "{{ role }}", action: "setup"}
+{% for role in host['rolesname'] %}{% if role != 'sf-mysql' %}    - {name: "{{ role }}", action: "setup"{% if role == "sf-nodepool" %}, nodepool_services: {{ host["nodepool_services"] }}{% endif %}}
 {% endif %}{% endfor %}
   post_tasks:
     - include: /etc/ansible/tasks/selinux_finalize.yml

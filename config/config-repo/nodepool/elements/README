@@ -1,1 +1,5 @@
-Custom diskimage builder element to be used by nodepool-builder
+Customs diskimage builder elements to be used by nodepool-builder.
+
+Nodepool is configured to use by default (with low precedence):
+* https://softwarefactory-project.io/r/software-factory/sf-elements
+* git://git.openstack.org/openstack-infra/project-config/nodepool/elements

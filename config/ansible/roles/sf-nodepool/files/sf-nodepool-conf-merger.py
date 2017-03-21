@@ -12,6 +12,8 @@ def merge(_nodepool):
     for provider in user['providers']:
         for image in provider['images']:
             image['private-key'] = '/var/lib/nodepool/.ssh/id_rsa'
+        if not provider.get("image-type"):
+            provider["image-type"] = "raw"
 
     for dib in user['diskimages']:
         dib['env-vars']['TMPDIR'] = '/var/cache/nodepool/dib_tmp'

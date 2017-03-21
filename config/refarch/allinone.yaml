@@ -15,6 +15,7 @@ inventory:
       - gerritbot
       - zuul
       - nodepool
+      - nodepool-builder
       - jenkins
       - murmur
       - elasticsearch

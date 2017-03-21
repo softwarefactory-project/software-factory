@@ -22,5 +22,6 @@ diskimages: []
 #  - name: centos-7
 #    elements:
 #      - centos-minimal
+#      - software-factory-base-rpm
 #    env-vars:
 #      DIB_CHECKSUM: '1'

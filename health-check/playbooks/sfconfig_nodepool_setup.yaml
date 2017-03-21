@@ -31,4 +31,4 @@
 - hosts: nodepool
   tasks:
     - name: "Check configuration"
-      command: grep "project-name.*{{ os_tenant_name }}" /etc/nodepool/nodepool.yaml
+      command: grep "project-name.*{{ os_tenant_name }}" /var/lib/nodepool/.config/openstack/clouds.yaml

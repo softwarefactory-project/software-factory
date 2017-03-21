@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -ex
+
+yum install --nogpgcheck -y https://softwarefactory-project.io/repos/sf-master.rpm
+yum install -y zuul-cloner java git wget curl patch python-tox python2-glob2
+rm /etc/yum.repos.d/sf-release.repo
+

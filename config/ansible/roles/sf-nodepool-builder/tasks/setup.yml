@@ -13,7 +13,7 @@
     - secure.conf
     - logging.conf
     - builder-logging.conf
-  notify: nodepool restart
+  notify: nodepool-builder restart
 
 - name: Install os-client-config
   template:
@@ -32,6 +32,9 @@
     dest: /root/.config/openstack/clouds.yaml
     mode: 0400
 
+- name: Give nodepool-builder sudo access
+  lineinfile: dest=/etc/sudoers.d/nodepool line="nodepool   ALL = NOPASSWD:ALL"
+
 - name: Install sf-nodepool-conf-merger.py
   copy:
     src: sf-nodepool-conf-merger.py
@@ -41,8 +44,8 @@
 - name: Setup sysconfig
   template:
     src: sysconfig.j2
-    dest: /etc/sysconfig/nodepool
-  notify: nodepool restart
+    dest: /etc/sysconfig/nodepool-builder
+  notify: nodepool-builder restart
 
 - name: Setup authorized keys
   copy:
@@ -55,4 +58,4 @@
     dest: /etc/nodepool/scripts/localCA.pem
 
 - name: Start service
-  service: name=nodepool state=started enabled=yes
+  service: name=nodepool-builder state=started enabled=yes

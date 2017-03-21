@@ -1,0 +1,29 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+cat > /etc/sudoers.d/jenkins << EOF
+jenkins ALL=(ALL) NOPASSWD:ALL
+EOF
+
+chmod 0440 /etc/sudoers.d/jenkins
+visudo -c || die "Error setting jenkins sudo!"
+
+# this was copied from outside the chroot by extras.d
+_pub_key=/tmp/in_target.d/zuul-user-ssh-public-key
+if [ ! -f $_pub_key ]; then
+    die "Can not find Zuul public key!"
+fi
+
+useradd -m -d /var/lib/jenkins jenkins
+
+mkdir /var/lib/jenkins/.ssh
+chmod 700 /var/lib/jenkins/.ssh
+cp $_pub_key /var/lib/jenkins/.ssh/authorized_keys
+
+# cleanup everything to the right owner
+chown -R jenkins:jenkins /var/lib/jenkins/.ssh

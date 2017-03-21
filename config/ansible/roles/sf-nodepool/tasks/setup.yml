@@ -54,4 +54,5 @@
     dest: /etc/nodepool/scripts/localCA.pem
 
 - name: Start service
-  service: name=nodepool state=started enabled=yes
+  service: name={{ item }} state=started enabled=yes
+  with_items: "{{ nodepool_services }}"

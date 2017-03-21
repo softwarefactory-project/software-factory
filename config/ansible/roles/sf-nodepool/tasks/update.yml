@@ -18,6 +18,11 @@
     - rsync -avi /usr/local/share/sf-jenkins-slave-tools/ /etc/nodepool/scripts/
     - rsync -avi --delete nodepool/elements/ /etc/nodepool/elements/
 
+- name: Restart service
+  service: name={{ item }} state=restarted
+  with_items: "{{ nodepool_services }}"
+  when: localconfig.stdout != upstreamconfig.stdout
+
 - name: Write config repo checksum matching current configuration
   copy: content="{{ upstreamconfig.stdout }}" dest=/var/lib/software-factory/nodepool_config
   when: localconfig.stdout != upstreamconfig.stdout

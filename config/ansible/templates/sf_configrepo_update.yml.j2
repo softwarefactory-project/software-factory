@@ -28,9 +28,12 @@
     - {role: 'sf-gerritbot', action: 'update'}
 {% endif %}
 
-- hosts: nodepool
+{% for host in inventory %}{% if 'sf-nodepool' in host['rolesname'] %}
+- hosts: {{ host['hostname'] }}
   roles:
-    - {role: 'sf-nodepool', action: 'update'}
+    - {role: 'sf-nodepool', action: 'update', nodepool_services: {{ host["nodepool_services"] }}}
+
+{% endif %}{% endfor %}
 
 - hosts: gerrit
   tasks:

@@ -1,0 +1,2 @@
+#!/bin/sh -ex
+sudo cp /var/lib/nodepool/.ssh/id_rsa.pub $TMP_HOOKS_PATH/id_rsa.pub

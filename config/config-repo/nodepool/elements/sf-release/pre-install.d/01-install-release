@@ -1,0 +1,2 @@
+#!/bin/sh -ex
+yum install -y --nogpgcheck https://softwarefactory-project.io/repos/sf-release-${SF_RELEASE:-2.5}.rpm

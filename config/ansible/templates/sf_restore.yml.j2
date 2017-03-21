@@ -24,7 +24,7 @@
 {% for host in inventory %}
 - hosts: {{ host['hostname'] }}
   roles:
-{% for role in host['roles'] %}    - {role: "sf-{{ role }}", action: "stop"}
+{% for role in host['rolesname'] %}    - {role: "{{ role }}", action: "stop"}
 {% endfor %}
 {% endfor %}
 
@@ -32,7 +32,7 @@
 {% for host in inventory %}
 - hosts: {{ host['hostname'] }}
   roles:
-{% for role in host['roles'] %}    - {role: "sf-{{ role }}", action: "restore", backup_src: "/var/lib/software-factory/backup/{{ role }}"}
+{% for role in host['rolesname'] %}    - {role: "{{ role }}", action: "restore", backup_src: "/var/lib/software-factory/backup/{{ role|replace('sf-', '') }}"}
 {% endfor %}
 {% endfor %}
 

@@ -1,0 +1,4 @@
+vm
+dhcp-all-interfaces
+growroot
+openssh-server

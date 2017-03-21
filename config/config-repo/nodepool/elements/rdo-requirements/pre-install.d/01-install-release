@@ -1,0 +1,2 @@
+#!/bin/sh -ex
+yum install -y https://repos.fedorapeople.org/repos/openstack/openstack-${RDO_RELEASE:-ocata}/rdo-release-${RDO_RELEASE:-ocata}-${RDO_RELEASE_VERSION:-2}.noarch.rpm

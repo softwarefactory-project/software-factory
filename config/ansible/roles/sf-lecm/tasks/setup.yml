@@ -14,14 +14,21 @@
   register: _httpd
   failed_when: _httpd.rc != 3 and _httpd.rc != 0
 
+- name: "Remove acme default configuration"
+  file: path=/etc/httpd/conf.d/acme.conf state=absent
+  register: _acme
+
 - name: "Reload apache"
   service: name=httpd state=reloaded
-  when: lecmgateway|changed and _httpd.rc == 0
+  when: (lecmgateway|changed or _acme|changed) and _httpd.rc == 0
 
 - name: "Ensure certificate are generated"
   command: lecm --generate
   args:
     creates: /etc/letsencrypt/pem/{{ fqdn }}.pem
+
+- name: "Ensure certificate has been generated"
+  command: test -f /etc/letsencrypt/pem/{{ fqdn }}.pem
 
 - name: "Install renew crontab"
   cron:

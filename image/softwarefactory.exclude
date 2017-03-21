@@ -61,6 +61,7 @@
 /var/lib/cauth/state_mapping.db
 /var/www/managesf/users.db
 /var/www/cauth/keys/
+/var/www/repos/
 
 # Sf data
 /var/lib/mysql/

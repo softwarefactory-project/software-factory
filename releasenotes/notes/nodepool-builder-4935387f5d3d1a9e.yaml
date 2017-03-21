@@ -1,0 +1,4 @@
+---
+features:
+  - A new nodepool-builder service to support dib image
+    creation.

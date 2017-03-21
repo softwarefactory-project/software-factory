@@ -1,26 +1,32 @@
-providers: []
-#providers:
-#  - name: default
-#    cloud: cloud-name-from-sfconfig.yaml
-#    images:
-#      - name: centos7
-#        base-image: centos7-cloud
-#        username: centos
-#        setup: base.sh
-#        min-ram: 4096
+diskimages: []
+#  - name: dib-centos-7
+#    elements:
+#      - centos-minimal
+#      - nodepool-minimal
+#      - sf-zuul-worker
+#    env-vars:
+#      DIB_CHECKSUM: '1'
 
 labels: []
-#labels:
-#  - name: myproject-centos7-slave
-#    image: centos7
-#    min-ready: 5
+#  - name: centos-7
+#    image: centos-7
+#    min-ready: 1
 #    providers:
 #      - name: default
 
-diskimages: []
-#diskimages:
-#  - name: centos-7
-#    elements:
-#      - centos-minimal
-#    env-vars:
-#      DIB_CHECKSUM: '1'
+providers: []
+#  - name: default
+#    cloud: default
+#    clean-floating-ips: true
+#    image-type: raw
+#    max-servers: 10
+#    boot-timeout: 120
+#    pool: nova
+#    rate: 10.0
+#    networks:
+#      - name: slave-net-name
+#    images:
+#      - name: centos-7
+#        diskimage: dib-centos-7
+#        username: jenkins
+#        min-ram: 1024

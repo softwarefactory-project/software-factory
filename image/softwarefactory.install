@@ -355,8 +355,7 @@ build_all() {
     ansible_install sf-gerritbot
     ansible_install sf-gitweb
     ansible_install sf-nodepool
-    # Try to install nodepoold until the nodepool role is updated
-    do_chroot ${dir} yum install -y ${INSTALL_OPTIONS} nodepoold || true
+    ansible_install sf-nodepool-builder
     ansible_install sf-storyboard
     ansible_install sf-storyboard-webclient "${STORYBOARD_WEBCLIENT_EXTRA_VARS}"
     ansible_install sf-mirror "${MIRROR2SWIFT_EXTRA_VARS}"

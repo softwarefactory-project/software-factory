@@ -1,0 +1,8 @@
+#!/bin/bash
+
+set -ex
+
+yum install --nogpgcheck -y http://46.231.133.231/kojifiles/packages/software-factory/2.2.6.253.g7150434/3.el7.centos/noarch/software-factory-release-2.2.6.253.g7150434-3.el7.centos.noarch.rpm
+yum install --nogpgcheck -y zuul-cloner java git wget curl patch python-tox python2-glob2
+rm /etc/yum.repos.d/sf-release.repo
+

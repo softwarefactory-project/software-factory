@@ -1,3 +1,4 @@
 ---
 - name: nodepool restart
-  service: name=nodepool state=restarted
+  service: name={{ item }} state=restarted
+  with_items: "{{ nodepool_services }}"

@@ -9,6 +9,10 @@ jenkins_password: "CHANGE_ME"
 jenkins_host: "example.com"
 jenkins_api_url: "http://{{ jenkins_host }}:8080/jenkins/"
 
+nodepool_services:
+  - nodepool
+  - nodepool-builder
+
 nodepool_providers:
   - name: default
     auth_url: http://localhost:35357/v2.0

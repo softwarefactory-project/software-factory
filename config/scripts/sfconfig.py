@@ -625,6 +625,20 @@ def generate_inventory_and_playbooks(arch, ansible_root):
     # Adds playbooks to architecture
     for host in arch["inventory"]:
         host["rolesname"] = map(lambda x: "sf-%s" % x, host["roles"])
+    # Merge nodepool/nodepool-builder role
+    for host in arch["inventory"]:
+        for role in host["rolesname"]:
+            if role == "sf-nodepool":
+                host["nodepool_services"] = "[nodepool, nodepool-builder]"
+            elif role == "sf-nodepool-builder":
+                host.setdefault("nodepool_services", []).append(
+                    "nodepool-builder")
+        # Remove meta roles
+        if "sf-nodepool-builder" in host["rolesname"]:
+            host["rolesname"].remove("sf-nodepool-builder")
+            # Make sure the base role is present
+            if "sf-nodepool" not in host["rolesname"]:
+                host["rolesname"].append("sf-nodepool")
 
     templates = "%s/templates" % ansible_root
 

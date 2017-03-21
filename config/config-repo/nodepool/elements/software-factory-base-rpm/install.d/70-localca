@@ -1,0 +1,16 @@
+#!/bin/bash
+
+if [ ${DIB_DEBUG_TRACE:-0} -gt 0 ]; then
+    set -x
+fi
+set -eu
+set -o pipefail
+
+# this was copied from outside the chroot by extras.d
+_pub_key=/tmp/in_target.d/zuul-user-ssh-public-key
+if [ ! -f $_pub_key ]; then
+    die "Can not find Zuul public key!"
+fi
+
+cp /opt/nodepool-scripts/*.pem /etc/pki/ca-trust/source/anchors/
+update-ca-trust

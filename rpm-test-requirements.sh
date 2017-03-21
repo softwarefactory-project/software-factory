@@ -15,6 +15,9 @@ fi
 if [ "$(echo ${ZUUL_CHANGES} | grep python-sfmanager)" != "" ]; then
     sudo yum upgrade -y python2-sfmanager
 fi
+if [ "$(echo ${ZUUL_CHANGES} | grep pysflib)" != "" ]; then
+    sudo yum upgrade -y pysflib
+fi
 # Check if test-requirements are already installed
 which tox &> /dev/null &&       \
 which nosetests &> /dev/null && \

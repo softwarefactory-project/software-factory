@@ -1,0 +1,5 @@
+Make sure the instance is usable by nodepool:
+
+* create jenkins user
+* setup ssh access
+* create nodepool dir and copy scripts

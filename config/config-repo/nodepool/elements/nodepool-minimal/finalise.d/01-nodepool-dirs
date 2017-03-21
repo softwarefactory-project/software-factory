@@ -1,0 +1,3 @@
+#!/bin/sh -ex
+mkdir /etc/nodepool
+chmod 0777 /etc/nodepool

@@ -1,0 +1,6 @@
+#!/bin/sh -ex
+mkdir -m 0700 /var/lib/zuul/.ssh
+cp /tmp/in_target.d/id_rsa.pub /var/lib/zuul/.ssh/authorized_keys
+chmod 0600 /var/lib/zuul/.ssh/authorized_keys
+chown -R zuul:zuul /var/lib/zuul
+echo -e "Defaults    !requiretty\nzuul ALL=(ALL) NOPASSWD:ALL" > /etc/sudoers.d/zuul

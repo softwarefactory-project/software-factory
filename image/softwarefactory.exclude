@@ -54,6 +54,7 @@
 /root/software-factory/
 /root/config/
 /var/lib/software-factory/bootstrap-data/
+/var/lib/software-factory/backup/
 /var/lib/zuul/
 /var/lib/umurmurd/
 /var/lib/managesf/users.db
@@ -61,6 +62,7 @@
 /var/lib/cauth/
 /var/www/managesf/users.db
 /var/www/cauth/keys/
+/var/www/repos/
 
 # Sf data
 /var/lib/mysql/

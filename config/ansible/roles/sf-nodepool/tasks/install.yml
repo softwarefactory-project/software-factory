@@ -1,7 +1,7 @@
 ---
 - name: "Install package"
   yum:
-    name: "nodepool"
+    name: "nodepoold, nodepool-builder, nodepool-elements, sf-elements"
     state: present
     disablerepo: "{{ yum_disable_repo|default(omit) }}"
     enablerepo: "{{ yum_enable_repo|default(omit) }}"

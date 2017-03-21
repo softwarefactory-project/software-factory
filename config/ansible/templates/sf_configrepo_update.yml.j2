@@ -9,8 +9,7 @@
       command: git ls-remote -h http://{{ '{{' }} fqdn {{ '}}' }}/r/config.git
       register: configsha
 
-- hosts: gateway:jenkins:zuul:nodepool:managesf:gerrit{% if 'gerritbot' in roles %}:gerritbot{% endif %}{% if 'mirror' in roles %}:mirror{% endif %}{% if 'repoxplorer' in roles %}:repoxplorer{% endif %}
-
+- hosts: all
   tasks:
     - include: tasks/update_configrepo.yaml
 
@@ -28,9 +27,12 @@
     - {role: 'sf-gerritbot', action: 'update'}
 {% endif %}
 
-- hosts: nodepool
+{% for host in inventory %}{% if 'sf-nodepool' in host['rolesname'] %}
+- hosts: {{ host['hostname'] }}
   roles:
-    - {role: 'sf-nodepool', action: 'update'}
+    - {role: 'sf-nodepool', action: 'update', nodepool_services: {{ host["nodepool_services"] }}}
+
+{% endif %}{% endfor %}
 
 - hosts: gerrit
   tasks:

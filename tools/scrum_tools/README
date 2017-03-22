@@ -1,0 +1,77 @@
+SCRUM TOOLS
+===========
+
+This script allows scrum masters to manage easily tasks on Storyboard.
+
+Prerequisites
+-------------
+
+* Using the tag "groomed" to mark stories that were validated by the team
+* Using the tag "bug" to differentiate stories and bug reports
+* Using the tag "confirmed" to mark bug reports that are reproducible
+* An automated worklist for unrefined stories: "Stories where ProjectGroup is XXX and Tags is not groomed and Tags is not bug and StoryStatus is Active"
+* An automated worklist for for bug triage: "Stories where ProjectGroup is XXX and Tags is bug and Tags is not confirmed and StoryStatus is Active"
+
+The sprint board will consist of the following lanes:
+
+* Groomed Stories: stories that were approved and prepared by the team -> tagged "groomed", not "blocked", not "bug", at least one task still open
+* Blocked: tasks (any type) marked with the "blocked" tag
+* Open Tasks: tasks from groomed stories (not bugs) that aren't assigned yet, not "blocked"
+* Open, Confirmed Bugs: tasks from triaged bug stories that aren't assigned yet (stories marked "bug" and "confirmed"), not "blocked"
+* Current Sprint: tasks from groomed stories or triaged bug stories that are assigned, not "blocked"
+* In Progress: tasks in status "In progress", not "blocked"
+* Ready for Review: tasks in status "review", not "blocked"
+* Done: tasks set in status "Done" during the sprint
+
+Workflow
+--------
+
+AT ANY TIME DURING THE SPRINT (OR DURING GROOMING)
+..................................................
+
+1. Someone writes a story (eventually with sub tasks), no specific tag set
+2. The team checks the "to groom" worklist
+    - is it a story ? Groom it if valid, add tag "groomed" when groomed to satisfaction
+    - is it a bug ? Triage it if valid, groom it more eventually
+3. If a task cannot be worked on because of a temporary blocker, tag it as "blocked"
+
+When the grooming is over, run::
+
+  python sf_scrummaster.py --url https://softwarefactory-project.io --api-key YOURAPIKEY --project-group Software-Factory --board sf-backlog-ng boards update
+
+To rearrange tasks in the board automatically.
+
+AT THE BEGINNING OF A NEW SPRINT
+................................
+
+1. The team discusses blocked tasks: did the impediment disappear? What can be done to resume  work ?
+    -> if unblocked: remove tag
+    -> else: add more tasks to parent story to resolve blocker if possible
+2. The team discusses tasks still in "Review" or "Progress" lanes. These are our "stock" and should always
+   be kept at a minimal level.
+3. The tasks from the previous sprint still in "Current Sprint" (assigned but not worked on)
+   get discussed by the team. If they are still valid, they remain there, otherwise they get
+   unassigned or deemed Invalid
+4. The team discusses tasks and bugs to pick from columns "Open Tasks" and "Confirmed, Open Bugs". Picked tasks get assigned to someone who will be the "owner" of the task
+    -> the owner is responsible to ensure the task's status is up to date, so usually (but not necessarily) the person who will work on it
+
+-> IMPORTANT !! Finished tasks within the sprint must be set to "Done" before the sprint ends ! 
+When the planning is over, run::
+
+  python sf_scrummaster.py --url https://softwarefactory-project.io --api-key YOURAPIKEY --project-group Software-Factory --board sf-backlog-ng sprint start 2017-16
+
+(replace with the name of the sprint, which must be of the form YYYY-WW)
+
+This will empty the "Done" lane and create a new due date on the board.
+
+AT SPRINT END (REVIEW)
+......................
+
+1. Before review, task owners make sure tasks are in the correct state (in progress, in review, done, blocked)
+2. Review as usual
+
+When the review is over, run::
+
+  python sf_scrummaster.py --url https://softwarefactory-project.io --api-key YOURAPIKEY --project-group Software-Factory --board sf-backlog-ng sprint close 2017-14
+
+To close the sprint. This will tag all the current tasks with the tag "2017-14" for later retrieval and stats.

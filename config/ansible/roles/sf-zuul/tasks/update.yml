@@ -21,16 +21,12 @@
 
 - name: Reload zuul service
   service: name=zuul state=reloaded
-  when: localconfig.stdout != upstreamconfig.stdout
+  when: "'zuul' in zuul_services and localconfig.stdout != upstreamconfig.stdout"
 
-- name: Restart zuul-merger
+# Zuul-merger doesn't support reload, restart is needed
+- name: Restart zuul-merger service
   service: name=zuul-merger state=restarted
-  when: localconfig.stdout != upstreamconfig.stdout
-
-# Reload doesn't start service see: https://github.com/ansible/ansible/issues/4448
-- name: Ensure zuul services are running
-  service: name={{ item }} state=started enabled=yes
-  with_items: [zuul, zuul-merger]
+  when: "'zuul-merger' in zuul_services and localconfig.stdout != upstreamconfig.stdout"
 
 - name: Write config repo sha1 matching current configuration
   copy: content="{{ upstreamconfig.stdout }}" dest=/var/lib/software-factory/zuul_config

@@ -14,6 +14,7 @@ inventory:
       - gerrit
       - gerritbot
       - zuul
+      - zuul-merger
       - nodepool
       - nodepool-builder
       - jenkins

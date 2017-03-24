@@ -22,8 +22,6 @@
 
 # Setup sf-base role on all hosts
 - hosts: all
-  pre_tasks:
-    - include: /etc/ansible/tasks/selinux_check.yml
   roles:
     - {name: "sf-postfix", action: "setup"}
     - {name: "sf-base", action: "setup"}
@@ -45,9 +43,6 @@
   roles:
 {% for role in host['rolesname'] %}{% if role != 'sf-mysql' %}    - {name: "{{ role }}", action: "setup"{% if role == "sf-nodepool" %}, nodepool_services: {{ host["nodepool_services"] }}{% endif %}{% if role == "sf-zuul" %}, zuul_services: {{ host["zuul_services"] }}{% endif %}}
 {% endif %}{% endfor %}
-  post_tasks:
-    - include: /etc/ansible/tasks/selinux_finalize.yml
-      when: selinuxenabled
 
 {% endfor %}
 

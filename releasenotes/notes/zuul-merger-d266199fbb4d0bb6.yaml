@@ -1,0 +1,4 @@
+---
+features:
+  - The zuul-merger service can be deployed on a dedicated
+    node and it is no longer tied to the zuul-server node.

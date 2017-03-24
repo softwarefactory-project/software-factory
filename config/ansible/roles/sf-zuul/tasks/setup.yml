@@ -8,8 +8,7 @@
       proto: tcp
       setype: http_port_t
       state: present
-  when:
-      - selinuxenabled
+  when: ansible_selinux.status == "enabled"
 
 - name: Setup apache site zuul.conf
   template: src=zuul.site.j2 dest=/etc/httpd/conf.d/zuul.conf mode=0444

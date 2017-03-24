@@ -110,8 +110,7 @@
       proto: tcp
       setype: http_port_t
       state: present
-  when:
-      - selinuxenabled
+  when: ansible_selinux.status == "enabled"
 
 - name: "Test if gerrit All-Projects exists"
   stat: path=/var/lib/gerrit/git/All-Projects.git

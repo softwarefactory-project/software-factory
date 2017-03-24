@@ -18,9 +18,12 @@
   roles:
     - {role: 'sf-jenkins', action: 'update'}
 
-- hosts: zuul
+{% for host in inventory %}{% if 'sf-zuul' in host['rolesname'] %}
+- hosts: {{ host['hostname'] }}
   roles:
-    - {role: 'sf-zuul', action: 'update'}
+    - {role: 'sf-zuul', action: 'update', zuul_services: {{ host["zuul_services"] }}}
+
+{% endif %}{% endfor %}
 
 {% if 'gerritbot' in roles %}
 - hosts: gerritbot

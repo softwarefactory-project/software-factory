@@ -3,6 +3,4 @@
   service:
     name: "{{ item }}"
     state: restarted
-  with_items:
-    - zuul
-    - zuul-merger
+  with_items: "{{ zuul_services }}"

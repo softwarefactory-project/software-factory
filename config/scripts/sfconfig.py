@@ -633,12 +633,22 @@ def generate_inventory_and_playbooks(arch, ansible_root):
             elif role == "sf-nodepool-builder":
                 host.setdefault("nodepool_services", []).append(
                     "nodepool-builder")
+            elif role == "sf-zuul":
+                host.setdefault("zuul_services", []).append("zuul")
+            elif role == "sf-zuul-merger":
+                host.setdefault("zuul_services", []).append("zuul-merger")
+
         # Remove meta roles
         if "sf-nodepool-builder" in host["rolesname"]:
             host["rolesname"].remove("sf-nodepool-builder")
             # Make sure the base role is present
             if "sf-nodepool" not in host["rolesname"]:
                 host["rolesname"].append("sf-nodepool")
+        if "sf-zuul-merger" in host["rolesname"]:
+            host["rolesname"].remove("sf-zuul-merger")
+            # Make sure the base role is present
+            if "sf-zuul" not in host["rolesname"]:
+                host["rolesname"].append("sf-zuul")
 
     templates = "%s/templates" % ansible_root
 

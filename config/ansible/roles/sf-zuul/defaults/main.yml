@@ -5,6 +5,10 @@ role_actions:
   - update
   - get_logs
 
+zuul_services:
+  - zuul
+  - zuul-merger
+
 zuul_port: 8084
 
 gerrit_pub_url: "https://example.com/r/"

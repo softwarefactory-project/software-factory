@@ -625,23 +625,28 @@ def generate_inventory_and_playbooks(arch, ansible_root):
     # Adds playbooks to architecture
     for host in arch["inventory"]:
         host["rolesname"] = map(lambda x: "sf-%s" % x, host["roles"])
-    # Merge nodepool and nodepool-builder role
+    # Merge nodepool/nodepool-builder and zuul/zuul-merger role
     for host in arch["inventory"]:
         for role in host["rolesname"]:
             if role == "sf-nodepool":
-                if "sf-nodepool-builder" in host["rolesname"]:
-                    host["nodepool_services"] = "[nodepool, nodepool-builder]"
-                else:
-                    host["nodepool_services"] = "[nodepool]"
+                host.setdefault("nodepool_services", []).append("nodepool")
             elif role == "sf-nodepool-builder":
-                if "sf-nodepool" in host["rolesname"]:
-                    host["nodepool_services"] = "[nodepool, nodepool-builder]"
-                else:
-                    host["nodepool_services"] = "[nodepool-builder]"
+                host.setdefault("nodepool_services", []).append("nodepool-builder")
+            elif role == "sf-zuul":
+                host.setdefault("zuul_services", []).append("zuul")
+            elif role == "sf-zuul-merger":
+                host.setdefault("zuul_services", []).append("zuul-merger")
+        # Remove meta roles
         if "sf-nodepool-builder" in host["rolesname"]:
             host["rolesname"].remove("sf-nodepool-builder")
+            # Make sure the base role is present
             if "sf-nodepool" not in host["rolesname"]:
                 host["rolesname"].append("sf-nodepool")
+        if "sf-zuul-merger" in host["rolesname"]:
+            host["rolesname"].remove("sf-zuul-merger")
+            # Make sure the base role is present
+            if "sf-zuul" not in host["rolesname"]:
+                host["rolesname"].append("sf-zuul")
 
     templates = "%s/templates" % ansible_root
 

@@ -64,8 +64,11 @@
 
 - name: "system: allow apache to connect database"
   seboolean: name={{ item }} state=yes persistent=yes
-  with_items: [httpd_can_network_connect, httpd_can_network_connect_db]
-  when: selinuxenabled
+  when: ansible_selinux.status == "enabled"
+  with_items:
+    - httpd_can_network_connect
+    - httpd_can_network_connect_db
+    - logging_syslogd_can_sendmail
 
 - name: "system: install wait4 scripts"
   copy: src={{ item }} dest=/usr/libexec/{{ item }} mode=0555

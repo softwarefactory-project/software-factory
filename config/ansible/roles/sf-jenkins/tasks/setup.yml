@@ -97,8 +97,7 @@
       setype: http_port_t
       state: present
   with_items: ["{{ jenkins_http_port}}", "{{ jenkins_api_port }}"]
-  when:
-      - selinuxenabled
+  when: ansible_selinux.status == "enabled"
 
 - name: Install service file
   template:

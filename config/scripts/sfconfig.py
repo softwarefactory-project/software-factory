@@ -572,8 +572,8 @@ DNS.1 = %s
         glue["jenkins_pub_url"] = "%s/jenkins/" % glue["gateway_url"]
         get_or_generate_ssh_key("jenkins_rsa")
 
-    if "mosquitto" in arch["roles"]:
-        glue["mosquitto_host"] = get_hostname("mosquitto")
+    if "firehose" in arch["roles"]:
+        glue["firehose_host"] = get_hostname("firehose")
 
     if "grafana" in arch["roles"]:
         glue["grafana_internal_url"] = "http://%s:%s/" % (
@@ -623,8 +623,10 @@ DNS.1 = %s
 
 def generate_inventory_and_playbooks(arch, ansible_root):
     # Adds playbooks to architecture
+    firehose = False
     for host in arch["inventory"]:
         host["rolesname"] = map(lambda x: "sf-%s" % x, host["roles"])
+        firehose = firehose or ("sf-firehose" in host["rolesname"])
     # Merge nodepool/nodepool-builder role
     for host in arch["inventory"]:
         for role in host["rolesname"]:
@@ -649,6 +651,12 @@ def generate_inventory_and_playbooks(arch, ansible_root):
             # Make sure the base role is present
             if "sf-zuul" not in host["rolesname"]:
                 host["rolesname"].append("sf-zuul")
+
+        # if firehose role is in the arch, install ochlero where needed
+        if firehose:
+            if "sf-zuul" in host["rolesname"] or\
+               "sf-nodepool" in host["rolesname"]:
+                host["rolesname"].append("sf-ochlero")
 
     templates = "%s/templates" % ansible_root
 

@@ -1,0 +1,4 @@
+---
+- name: "Fetch ochlero config"
+  synchronize: mode=pull src="/etc/ochlero/" dest="{{ log_dest }}/etc"
+  ignore_errors: True

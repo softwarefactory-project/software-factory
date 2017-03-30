@@ -1,0 +1,11 @@
+---
+features:
+  - Firehose is an embedded MQTT broker that concentrates
+    events from services run within a Software Factory
+    deployment. Services currently supported are gerrit,
+    zuul, jenkins and nodepool.
+upgrade:
+  - In order to activate firehose, add the "firehose" role
+    to your architecture file.
+security:
+  - Any subscriptions to the MQTT service are read-only.

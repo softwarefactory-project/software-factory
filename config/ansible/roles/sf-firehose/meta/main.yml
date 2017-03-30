@@ -1,6 +1,6 @@
 ---
 galaxy_info:
-  description: Ochlero service
+  description: Firehose service
   company: Red Hat
   license: Apache
   min_ansible_version: 1.9
@@ -12,3 +12,4 @@ galaxy_info:
     - software-factory
 dependencies:
   - role: sf-mosquitto
+  - { role: 'sf-germqtt', when: '"gerrit" in roles' }

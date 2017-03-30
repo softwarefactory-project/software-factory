@@ -1,0 +1,4 @@
+---
+- name: "Fetch germqtt config"
+  synchronize: mode=pull src="/etc/germqtt/" dest="{{ log_dest }}/etc"
+  ignore_errors: True

@@ -247,6 +247,21 @@ EOF
     checkpoint "configure_network"
 }
 
+function firehose_listen {
+    [ -e ${ARTIFACTS_DIR}/firehose.log ] && rm ${ARTIFACTS_DIR}/firehose.log
+    echo "Listening to Firehose events..."
+    (mosquitto_sub -h sftests.com -t '#' > ${ARTIFACTS_DIR}/firehose.log & );
+}
+
+function firehose_check {
+    pkill mosquitto_sub
+    # TODO very basic checks for now
+    echo "Checking Firehose events"
+    grep -q -i "review" ${ARTIFACTS_DIR}/firehose.log && echo "Review-type events found"
+    grep -q -i "config-update" ${ARTIFACTS_DIR}/firehose.log && echo "config-update related events found"
+    grep -q -i "PIPELINE" ${ARTIFACTS_DIR}/firehose.log && echo "Zuul-related events found"
+}
+
 function get_logs {
     #This delay is used to wait a bit before fetching log file from hosts
     #in order to not avoid so important logs that can appears some seconds
@@ -266,7 +281,6 @@ function get_logs {
     [ -d /var/log/selenium ] && cp -r /var/log/selenium/ ${ARTIFACTS_DIR}/selenium
     [ -d /var/log/Xvfb ] && cp -r /var/log/Xvfb/ ${ARTIFACTS_DIR}/Xvfb
     cp -r /tmp/gui/ ${ARTIFACTS_DIR}/screenshots
-
     # Compress gui test
     (ls /tmp/gui/*.avi 1> /dev/null 2>&1) && gzip -9 ${ARTIFACTS_DIR}/screenshots/*.avi
     (ls /tmp/gui/*.mp* 1> /dev/null 2>&1) && gzip -9 ${ARTIFACTS_DIR}/screenshots/*.mp*
@@ -482,9 +496,11 @@ function run_checker {
 
 function run_functional_tests {
     echo "$(date) ======= run_functional_tests"
+    firehose_listen
     nosetests --with-timer --with-xunit --logging-format "%(asctime)s: %(levelname)s - %(message)s" -s -v ${SF_TESTS} \
         && echo "Functional tests: SUCCESS" \
         || fail "Functional tests failed" ${ARTIFACTS_DIR}/functional-tests.debug
+    firehose_check
     checkpoint "run_functional_tests"
 }
 

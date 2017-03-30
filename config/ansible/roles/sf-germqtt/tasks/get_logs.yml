@@ -1,0 +1,9 @@
+---
+- name: "Gather germqtt logs"
+  shell: mkdir /tmp/germqtt && journalctl -u germqtt --no-pager >> /tmp/germqtt/germqtt.log
+- name: "Fetch germqtt logs"
+  synchronize: mode=pull src="/tmp/germqtt/" dest="{{ log_dest }}/log/"
+  ignore_errors: True
+- name: "Fetch germqtt config"
+  synchronize: mode=pull src="/etc/germqtt/" dest="{{ log_dest }}/etc"
+  ignore_errors: True

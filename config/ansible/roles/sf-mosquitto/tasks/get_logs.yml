@@ -1,0 +1,9 @@
+---
+- name: "Gather mosquitto logs"
+  shell: mkdir /tmp/mosquitto && journalctl -u mosquitto --no-pager >> /tmp/mosquitto/mosquitto.log
+- name: "Fetch mosquitto logs"
+  synchronize: mode=pull src="/tmp/mosquitto/" dest="{{ log_dest }}/log/"
+  ignore_errors: True
+- name: "Fetch mosquitto config"
+  synchronize: mode=pull src="/etc/mosquitto/" dest="{{ log_dest }}/etc"
+  ignore_errors: True

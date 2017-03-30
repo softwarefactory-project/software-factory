@@ -247,6 +247,20 @@ EOF
     checkpoint "configure_network"
 }
 
+function firehose_listen {
+    [ -e /tmp/firehose.log ] && rm /tmp/firehose.log
+    echo "Listening to Firehose events..."
+    (mosquitto_sub -h sftests.com -t '#' > /tmp/firehose.log & ); FIREHOSE_PID=$!
+}
+
+function firehose_check {
+    kill $FIREHOSE_PID
+    # TODO very basic checks for now
+    grep -q -i "review" /tmp/firehose.log
+    grep -q -i "config-update" /tmp/firehose.log
+    grep -q -i "ZUUL" /tmp/firehose.log
+}
+
 function get_logs {
     #This delay is used to wait a bit before fetching log file from hosts
     #in order to not avoid so important logs that can appears some seconds
@@ -267,6 +281,7 @@ function get_logs {
     [ -d /var/log/Xvfb ] && cp -r /var/log/Xvfb/ ${ARTIFACTS_DIR}/Xvfb
     cp -r /tmp/gui/ ${ARTIFACTS_DIR}/screenshots
 
+    [ -e /tmp/firehose.log ] && cp /tmp/firehose.log ${ARTIFACTS_DIR}/firehose.log
     # Compress gui test
     (ls /tmp/gui/*.avi 1> /dev/null 2>&1) && gzip -9 ${ARTIFACTS_DIR}/screenshots/*.avi
     (ls /tmp/gui/*.mp* 1> /dev/null 2>&1) && gzip -9 ${ARTIFACTS_DIR}/screenshots/*.mp*

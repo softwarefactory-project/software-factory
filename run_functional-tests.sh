@@ -80,7 +80,9 @@ case "${TEST_TYPE}" in
         lxc_poweroff
         lxc_start
         wait_boot_finished
+        firehose_listen
         run_functional_tests
+        firehose_check
         if [ "${SF_TESTS}" != "tests/functional" ]; then
             exit 0
         fi
@@ -112,7 +114,9 @@ case "${TEST_TYPE}" in
         run_upgrade
         run_checker "checksum_warn_only"
         run_serverspec_tests
+        firehose_listen
         run_functional_tests
+        firehose_check
         ;;
     "openstack")
         heat_stop

@@ -27,10 +27,8 @@ inventory:
       - mirror
       - storyboard
       - storyboard-webclient
-      - mosquitto
-      - germqtt
       - repoxplorer
-      - ochlero
+      - firehose
     mem: 8
     cpu: 4
     disk: 20

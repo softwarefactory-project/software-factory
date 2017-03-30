@@ -1,0 +1,9 @@
+---
+- name: "Gather ochlero logs"
+  shell: mkdir /tmp/ochlero && journalctl -u ochlero --no-pager >> /tmp/ochlero/ochlero.log
+- name: "Fetch ochlero logs"
+  synchronize: mode=pull src="/tmp/ochlero/" dest="{{ log_dest }}/log/"
+  ignore_errors: True
+- name: "Fetch ochlero config"
+  synchronize: mode=pull src="/etc/ochlero/" dest="{{ log_dest }}/etc"
+  ignore_errors: True

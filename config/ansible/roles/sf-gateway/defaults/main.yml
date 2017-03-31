@@ -4,6 +4,9 @@ role_actions:
   - setup
   - get_logs
 
+gateway_host: localhost
+nodepool_builder_host: ""
+
 welcome_page_path: "sf/welcome.html"
 
 # Base64 encoded logo data

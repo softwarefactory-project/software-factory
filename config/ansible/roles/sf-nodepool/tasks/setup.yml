@@ -11,8 +11,6 @@
   with_items:
     - _nodepool.yaml
     - secure.conf
-    - logging.conf
-  notify: nodepool restart
 
 - name: Install os-client-config
   template:
@@ -37,6 +35,12 @@
     dest: /usr/local/bin/sf-nodepool-conf-merger.py
     mode: 0555
 
+- name: Create image build log directory
+  file: path=/var/www/nodepool-log state=directory owner=nodepool group=apache mode=0750
+
+- name: Install httpd conf.d nodepool log
+  copy: src=nodepool_log.conf dest=/etc/httpd/conf.d/nodepool_log.conf
+
 - name: Setup sysconfig
   template:
     src: sysconfig.j2
@@ -54,5 +58,5 @@
     dest: /etc/nodepool/scripts/localCA.pem
 
 - name: Start service
-  service: name={{ item }} state=started enabled=yes
+  service: name={{ item }} enabled=yes
   with_items: "{{ nodepool_services }}"

@@ -101,6 +101,11 @@
         ProxyPass /paste/ http://127.0.0.1:5000/paste/ retry=0
         ProxyPassReverse /paste/ http://127.0.0.1:5000/paste/
 
+{% if gateway_host != nodepool_builder_host %}
+        ProxyPass /nodepool-log/ http://{{ nodepool_builder_host }}/nodepool-log/
+        ProxyPassReverse /nodepool-log/ http://{{ nodepool_builder_host }}/nodepool-log/
+{% endif %}
+
         ProxyPreserveHost On
         AllowEncodedSlashes NoDecode
         <Proxy *>

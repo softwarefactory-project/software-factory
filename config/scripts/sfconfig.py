@@ -496,6 +496,7 @@ DNS.1 = %s
 
     if "gateway" in arch["roles"]:
         get_or_generate_localCA()
+        glue["gateway_host"] = get_hostname("gateway")
         glue["gateway_topmenu_logo_data"] = encode_image(
             "/etc/software-factory/logo-topmenu.png")
         glue["gateway_favicon_data"] = encode_image(
@@ -562,6 +563,9 @@ DNS.1 = %s
             'user': 'nodepool',
             'password': secrets['nodepool_mysql_password'],
         }
+
+    if "nodepool-builder" in arch["roles"]:
+        glue["nodepool_builder_host"] = get_hostname("nodepool-builder")
 
     if "jenkins" in arch["roles"]:
         glue["jenkins_host"] = get_hostname("jenkins")

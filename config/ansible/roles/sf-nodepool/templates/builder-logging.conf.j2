@@ -1,8 +1,8 @@
 [loggers]
-keys=root,image,nodepool
+keys=root,nodepool{% for image in nodepool_config.diskimages %},image-{{ image.name }}{% endfor %}
 
 [handlers]
-keys=console,normal,image
+keys=console,normal{% for image in nodepool_config.diskimages %},image-{{ image.name }}{% endfor %}
 
 [formatters]
 keys=console,normal
@@ -17,12 +17,14 @@ propagate=0
 qualname=nodepool
 level={{ nodepool_loglevel }}
 
-[logger_image]
-handlers=image
+{% for image in nodepool_config.diskimages %}
+[logger_image-{{ image.name }}]
+handlers=image-{{ image.name }}
 propagate=0
-qualname=nodepool.image
+qualname=nodepool.image.build.{{ image.name }}
 level={{ nodepool_loglevel }}
 
+{% endfor %}
 
 [handler_console]
 level=INFO
@@ -36,12 +38,14 @@ class=logging.handlers.TimedRotatingFileHandler
 formatter=normal
 args=('/var/log/nodepool/builder.log', 'H', 8, 30,)
 
-[handler_image]
+{% for image in nodepool_config.diskimages %}
+[handler_image-{{ image.name }}]
 level=DEBUG
 class=logging.handlers.TimedRotatingFileHandler
 formatter=normal
-args=('/var/log/nodepool/builder-image.log', 'H', 8, 30,)
+args=('/var/www/nodepool-log/{{ image.name }}.log', 'H', 8, 14,)
 
+{% endfor %}
 
 [formatter_normal]
 format=%(asctime)s %(levelname)s %(name)s: %(message)s

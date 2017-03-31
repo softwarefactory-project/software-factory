@@ -18,6 +18,13 @@
     - rsync -avi /usr/local/share/sf-jenkins-slave-tools/ /etc/nodepool/scripts/
     - rsync -avi --delete nodepool/elements/ /etc/nodepool/elements/
 
+- name: Load nodepool configuration
+  include_vars: file=/etc/nodepool/nodepool.yaml name=nodepool_config
+
+- name: Update builder-logging.conf
+  template: src={{ item }}.j2 dest=/etc/nodepool/{{ item }}
+  with_items: [logging.conf, builder-logging.conf]
+
 - name: Restart service
   service: name={{ item }} state=restarted
   with_items: "{{ nodepool_services }}"

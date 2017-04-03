@@ -28,7 +28,7 @@
       when: sfconfiged.rc
       command: >
         hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
-            'name: '{{ provider_name }}',
+            'name': '{{ provider_name }}',
             'boot-timeout': 120,
             'clean-floating-ips': true,
             'cloud': '{{ provider_name }}',

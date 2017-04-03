@@ -70,7 +70,16 @@
       command: rsync -a /home/gerrit/site_path/cache /home/gerrit/site_path/data /home/gerrit/site_path/index /home/gerrit/site_path/git /home/gerrit/site_path/static /home/gerrit/site_path/tmp /var/lib/gerrit/
 
     - name: "Move .ssh to new home directory"
-      command: rsync -a /home/gerrit/.ssh /var/lib/gerrit/.ssh/
+      command: rsync -a /home/gerrit/.ssh/ /var/lib/gerrit/.ssh/
+
+    - name: "Fix keypath in .ssh/config"
+      command: sed -i "s#/home/gerrit/#/var/lib/gerrit/#" /var/lib/gerrit/.ssh/config
+
+    - name: "Remove known_hosts symlink"
+      file: path=/var/lib/gerrit/.ssh/known_hosts state=absent
+
+    - name: "Install real known_hosts"
+      command: mv /var/lib/gerrit/.ssh/known_hosts_gerrit /var/lib/gerrit/.ssh/known_hosts
 
     - name: "Archive previous gerrit tree"
       command: mv /home/gerrit /home/gerrit.old

@@ -18,6 +18,9 @@
 # Then will start the SF in LXC containers
 # Then will run the serverspecs and functional tests
 
+# No 2.4 maintenance are planned, disable CI
+exit 0
+
 if [ "$(id -un)" == "root" ]; then
     echo "Can't run tests as root, use centos user instead"
     exit 1

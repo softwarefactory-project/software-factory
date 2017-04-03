@@ -20,7 +20,7 @@
 - hosts: install-server
   tasks:
     - name: "Check if image is already defined"
-      shell: "grep -q '{{ node }}' /root/config/nodepool/labels.yaml && grep -q '{{ base_image_name }}' /root/config/nodepool/images.yaml"
+      shell: "grep -q '{{ node }}' /root/config/nodepool/nodepool.yaml && grep -q '{{ base_image_name }}' /root/config/nodepool/nodepool.yaml"
       register: sfconfiged
       failed_when: False
 
@@ -28,14 +28,15 @@
       when: sfconfiged.rc
       command: >
         hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
-            'name: '{{ provider_name }}',
+            'name': '{{ provider_name }}',
             'boot-timeout': 120,
-            'clean-floating-ips': true,
+            'clean-floating-ips': True,
             'cloud': '{{ provider_name }}',
             'pool': '{{ os_pool }}',
             'boot-timeout': 120,
             'max-servers': 3,
             'rate': 3.0,
+            'networks': [{'name': '{{ os_slave_network }}'}],
             'images': [{
                 'name': '{{ image_name }}',
                 'base-image': '{{ base_image_name }}',

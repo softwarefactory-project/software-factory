@@ -5,7 +5,6 @@ set -xe
 function install_with_pip {
     package=$1
     dir=$(echo ${package}|sed -r 's/([a-zA-Z_-]+).*/\1/')
-    sudo yum install -y python-virtualenv
 
     sudo virtualenv --system-site-packages --python=/usr/bin/python2 /opt/${dir}/venv
     sudo /opt/${dir}/venv/bin/pip install --install-option="--install-scripts=/usr/bin" ${package}
@@ -16,7 +15,8 @@ sudo yum update -y > /dev/null
 
 # Base requirements
 sudo yum install -y epel-release > /dev/null
-sudo yum install -y python-pip git wget curl patch iproute > /dev/null
+sudo yum install -y python-pip python-virtualenv \
+                    git wget curl patch iproute > /dev/null
 
 install_with_pip 'pip<8'
 install_with_pip tox

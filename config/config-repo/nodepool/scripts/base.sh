@@ -2,24 +2,11 @@
 
 set -xe
 
-function install_with_pip {
-    package=$1
-    dir=$(echo ${package}|sed -r 's/([a-zA-Z_-]+).*/\1/')
-    sudo yum install -y python-virtualenv
-
-    sudo virtualenv --system-site-packages --python=/usr/bin/python2 /opt/${dir}/venv
-    sudo /opt/${dir}/venv/bin/pip install --install-option="--install-scripts=/usr/bin" ${package}
-}
-
-
 sudo yum update -y > /dev/null
 
 # Base requirements
-sudo yum install -y epel-release > /dev/null
-sudo yum install -y python-pip git wget curl patch iproute > /dev/null
-
-install_with_pip 'pip<8'
-install_with_pip tox
+sudo yum install -y --nogpgcheck https://softwarefactory-project.io/repos/sf-release-${SF_RELEASE:-2.5}.rpm
+sudo yum install -y git wget curl patch iproute zuul-cloner python2-glob2 java python-magic > /dev/null
 
 # The jenkins user. Must be able to use sudo without password
 sudo useradd -m jenkins
@@ -42,18 +29,6 @@ sudo restorecon -R -v /home/jenkins/.ssh/authorized_keys
 # for that user.
 cloud_user=$(egrep " name:" /etc/cloud/cloud.cfg | awk '{print $2}')
 cat /opt/nodepool-scripts/authorized_keys | sudo tee -a /home/$cloud_user/.ssh/authorized_keys
-
-# Install java (required by Jenkins)
-sudo yum install -y java
-
-# Install glob2 and python-magic for zuul_swift_upload
-sudo yum install -y python-magic
-sudo pip install glob2
-
-# Install zuul-cloner
-# TODO: replace this section by zuul package
-sudo yum install -y python-requests gcc python-devel python-crypto
-install_with_pip zuul
 
 # Copy slave tools
 sudo cp -v /opt/nodepool-scripts/*.py /usr/local/bin/

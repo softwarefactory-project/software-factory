@@ -20,7 +20,7 @@
 - hosts: install-server
   tasks:
     - name: "Check if image is already defined"
-      shell: "grep -q '{{ node }}' /root/config/nodepool/labels.yaml && grep -q '{{ base_image_name }}' /root/config/nodepool/images.yaml"
+      shell: "grep -q '{{ node }}' /root/config/nodepool/nodepool.yaml && grep -q '{{ base_image_name }}' /root/config/nodepool/nodepool.yaml"
       register: sfconfiged
       failed_when: False
 
@@ -28,19 +28,20 @@
       when: sfconfiged.rc
       command: >
         hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
-            'name: '{{ provider_name }}',
+            'name': '{{ provider_name }}',
             'boot-timeout': 120,
-            'clean-floating-ips': true,
+            'clean-floating-ips': True,
             'cloud': '{{ provider_name }}',
             'pool': '{{ os_pool }}',
             'boot-timeout': 120,
             'max-servers': 3,
             'rate': 3.0,
+            'networks': [{'name': '{{ os_slave_network }}'}],
             'images': [{
                 'name': '{{ image_name }}',
                 'base-image': '{{ base_image_name }}',
                 'username': 'centos',
-                'setup': 'nodepool_demo.sh',
+                'setup': 'base.sh',
                 'min-ram': 2048,
             }]
         }]"
@@ -55,15 +56,10 @@
             'providers': [{'name': '{{ provider_name }}'}]
         }]"
 
-    - name: Copy nodepool-demo image script
-      when: sfconfiged.rc
-      copy: src=files/nodepool_demo.sh dest=/root/config/nodepool/nodepool_demo.sh mode="u=rwx,g=rx,o=rx"
-
     - name: Update change
       when: sfconfiged.rc
       command: chdir=/root/config  {{ item }}
       with_items:
-          - 'git add nodepool/nodepool_demo.sh'
           - 'git commit -a -m "Add {{ node }} label to {{ provider_name }} provider"'
       environment: {'EDITOR':'test'}
 
@@ -96,10 +92,10 @@
       wait_for: path=/var/log/nodepool/nodepool.log timeout=1200 search_regex="NodeLauncher. Node .* is ready"
 
     - name: "Wait for the first slave to appear in Jenkins"
-      shell: for i in {1..100}; do sleep ${i}; curl -Ls https://{{ fqdn }}/jenkins/computer/api/json | python -c "import sys, json; d = json.loads(sys.stdin.read()); slaves = [s for s in d['computer'] if ('base_centos-default' in s['displayName'])]; len(slaves) > 0 and sys.exit(0) or sys.exit(1)" && exit 0; done; exit 1
+      shell: for i in {1..100}; do sleep ${i}; curl -Ls https://{{ fqdn }}/jenkins/computer/api/json | python -c "import sys, json; d = json.loads(sys.stdin.read()); slaves = [s for s in d['computer'] if ('{{ node }}-default' in s['displayName'])]; len(slaves) > 0 and sys.exit(0) or sys.exit(1)" && exit 0; done; exit 1
 
     - name: "Wait for the first slave to appears online in Jenkins"
-      shell: for i in {1..100}; do sleep ${i}; curl -Ls https://{{ fqdn }}/jenkins/computer/api/json | python -c "import sys, json; d = json.loads(sys.stdin.read()); slaves = [s for s in d['computer'] if ('base_centos-default' in s['displayName'])]; any(s['offline'] == False for s in slaves) and sys.exit(0) or sys.exit(1)" && exit 0; done; exit 1
+      shell: for i in {1..100}; do sleep ${i}; curl -Ls https://{{ fqdn }}/jenkins/computer/api/json | python -c "import sys, json; d = json.loads(sys.stdin.read()); slaves = [s for s in d['computer'] if ('{{ node }}-default' in s['displayName'])]; any(s['offline'] == False for s in slaves) and sys.exit(0) or sys.exit(1)" && exit 0; done; exit 1
 
     - name: "Query the nodes REST API to get last node info"
       uri:
@@ -108,6 +104,9 @@
         return_content: yes
         body_format: json
       register: nodes_info
+
+    - name: "Node API returned value"
+      debug: var=nodes_info.json
 
     - name: "Hold the node with the REST API"
       uri:

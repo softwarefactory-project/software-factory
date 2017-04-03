@@ -42,6 +42,10 @@
       delay: 5
       changed_when: false
 
+    - name: "Wait for a slave to appears online in Jenkins"
+      shell: for i in {1..100}; do sleep ${i}; curl -Ls https://{{ fqdn }}/jenkins/computer/api/json | python -c "import sys, json; d = json.loads(sys.stdin.read()); slaves = [s for s in d['computer'] if ('{{ node }}-default' in s['displayName'])]; any(s['offline'] == False for s in slaves) and sys.exit(0) or sys.exit(1)" && exit 0; done; exit 1
+      when: node != 'master'
+
 # * Submit a bad change and verify Jenkins CI -1
 # * Fix bad change and verify Jenkins CI +1
 # * Check if change got merged

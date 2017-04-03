@@ -14,11 +14,10 @@ function install_with_pip {
 sudo yum update -y > /dev/null
 
 # Base requirements
-sudo yum install -y epel-release > /dev/null
-sudo yum install -y python-pip python-virtualenv \
+sudo yum install -y python-setuptools python-virtualenv \
                     git wget curl patch iproute > /dev/null
 
-install_with_pip 'pip<8'
+easy_install pip
 install_with_pip tox
 
 # The jenkins user. Must be able to use sudo without password

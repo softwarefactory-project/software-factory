@@ -1,0 +1,15 @@
+role_actions:
+  - install
+  - setup
+
+influxdb_host: influxdb.example.com
+influxdb_port: 25826
+
+influxdb_repo_name: influxdb
+influxdb_repo_desc: InfluxDB Repository
+influxdb_repo_url: https://repos.influxdata.com/rhel/\$releasever/\$basearch/stable
+influxdb_repo_gpgkey: https://repos.influxdata.com/influxdb.key
+influxdb_repo_gpgcheck: 1
+influxdb packages:
+    - influxdb
+    - telegraf

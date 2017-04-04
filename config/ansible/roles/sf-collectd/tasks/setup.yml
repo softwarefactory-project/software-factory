@@ -1,0 +1,45 @@
+---
+
+- name: Set hostname for collectd
+  lineinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      regexp: '^Hostname    "{{ ansible_fqdn }}"'
+      insertafter: '^#Hostname    "localhost"'
+      line: 'Hostname    "{{ ansible_fqdn }}"'
+  notify: Restart collectd
+
+- name: Enable network plugin
+  lineinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      regexp: '^LoadPlugin network'
+      insertafter: '^#LoadPlugin network'
+      line: 'LoadPlugin network'
+  notify: Restart collectd
+
+- name: Configure network plugin
+  blockinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      marker: '# <!-- {mark} ANSIBLE MANAGED BLOCK -->'
+      insertbefore: '#<Plugin network>'
+      block: |
+          <Plugin network>
+                  <Server "{{ collectd_influxdb_host }}" "{{ collectd_influxdb_port }}">
+                          SecurityLevel None
+                          #Username "{{ collectd_influxdb_username }}"
+                          #Password "{{ collectd_influxdb_password }}"
+                  </Server>
+                  ReportStats true
+          </Plugin>
+  notify: Restart collectd
+
+- name: Start service
+  service:
+      name: "{{ collectd_service }}"
+      state: started
+      enabled: yes

@@ -1,0 +1,10 @@
+role_actions:
+  - install
+  - setup
+
+collectd_repo_name: sfmaster
+collectd_service: collectd
+collectd_influxdb_host: influxdb.example.com
+collectd_influxdb_port: 25826
+collectd_influxdb_username: collectd
+collectd_influxdb_password: CHANGE_ME

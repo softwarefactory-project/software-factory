@@ -1,0 +1,18 @@
+---
+- name: Add the influxdb RPM repository
+  yum_repository:
+    name: "{{ influxdb_repo_name }}"
+    description: "{{ influxdb_repo_desc }}"
+    baseurl: "{{ influxdb_repo_url }}"
+    gpgkey: "{{ influxdb_repo_gpgkey }}"
+    gpgcheck: "{{ influxdb_repo_gpgcheck }}"
+
+- name: Install influxdb packages
+  yum:
+    name: "{{ item }}"
+    state: present
+    disablerepo: "*"
+    enablerepo: "{{ influxdb_repo_name }}"
+  with_items:
+      - influxdb
+      - telegraf

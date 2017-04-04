@@ -1,0 +1,27 @@
+---
+- name: Configure influxdb
+  blockinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/influxdb/influxdb.conf
+      dest: /etc/influxdb/influxdb.conf
+      marker: '# <!-- {mark} ANSIBLE MANAGED BLOCK -->'
+      insertafter: '[[collectd]]'
+      block: |
+            enabled = true
+            bind-address = "{{ influxdb_host }}:{{ influxdb_port }}"
+            database = "collectd"
+            retention-policy = ""
+            typesdb = "/usr/share/collectd/types.db"
+            #security-level = "none"
+            #auth-file = "/etc/collectd/auth_file"
+            batch-size = 5000
+            batch-pending = 10
+            batch-timeout = "10s"
+            read-buffer = 0
+  notify: Restart influxdb
+
+- name: Start service
+  service:
+      name: influxdb
+      state: started
+      enabled: yes

@@ -1,0 +1,54 @@
+---
+
+- name: Set hostname for collectd
+  lineinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      regexp: '^Hostname    "{{ ansible_fqdn }}"'
+      insertafter: '^#Hostname    "localhost"'
+      line: 'Hostname    "{{ ansible_fqdn }}"'
+  notify: Restart collectd
+
+- name: Enable network plugin
+  lineinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      regexp: '^LoadPlugin network'
+      insertafter: '^#LoadPlugin network'
+      line: 'LoadPlugin network'
+  notify: Restart collectd
+
+- name: Find ip address to use for collectd service
+  shell: ip route get 8.8.8.8 | awk '{print $7}'
+  register: ipaddr
+
+- name: Find interface to use for collectd service
+  shell: ip route get 8.8.8.8 | awk '{print $5}'
+  register: interface
+
+- name: Configure network plugin
+  blockinfile:
+      # TODO: use path with ansible 2.3
+      #path: /etc/collectd.conf
+      dest: /etc/collectd.conf
+      marker: '# <!-- {mark} ANSIBLE MANAGED BLOCK -->'
+      insertbefore: '#<Plugin network>'
+      block: |
+          <Plugin network>
+                  <Server '{{ ipaddr.stdout_lines[0] }}' '{{ collectd_port }}'>
+                          SecurityLevel None
+                          Username '{{ collectd_username }}'
+                          Password '{{ collectd_password }}'
+                          Interface '{{ interface.stdout_lines[0] }}'
+                  </Server>
+                  ReportStats true
+          </Plugin>
+  notify: Restart collectd
+
+- name: Start service
+  service:
+      name: "{{ collectd_service }}"
+      state: started
+      enabled: yes

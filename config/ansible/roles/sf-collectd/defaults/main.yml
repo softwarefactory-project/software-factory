@@ -1,0 +1,9 @@
+role_actions:
+  - install
+  - setup
+
+collectd_repo_name: sfmaster
+collectd_service: collectd
+collectd_port: 25826
+collectd_username: collectd
+collectd_password: CHANGE_ME

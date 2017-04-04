@@ -1,0 +1,7 @@
+---
+- name: "Install collectd package"
+  yum:
+    name: collectd
+    state: present
+    disablerepo: "*"
+    enablerepo: "{{ collectd_repo_name }}"

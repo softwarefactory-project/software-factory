@@ -585,6 +585,9 @@ DNS.1 = %s
             'password': secrets['grafana_mysql_password'],
         }
 
+    if "influxdb" in arch["roles"]:
+        glue["influxdb_host"] = get_hostname("influxdb")
+
     if "lodgeit" in arch["roles"]:
         glue["lodgeit_mysql_host"] = get_hostname("mysql")
         glue["mysql_databases"]["lodgeit"] = {

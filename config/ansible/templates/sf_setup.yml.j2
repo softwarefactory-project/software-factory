@@ -28,6 +28,9 @@
     - {name: "sf-postfix", action: "setup"}
     - {name: "sf-base", action: "setup"}
     - {name: "sf-monit", action: "setup"}
+{% if 'influxdb' in roles %}
+    - {name: "sf-collectd", action: "setup"}
+{% endif %}
 
 # Setup sf-mysql role before all components
 - hosts: mysql

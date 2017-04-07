@@ -32,6 +32,8 @@ inventory:
       - repoxplorer
       - ochlero
       - influxdb
+      - statds
+      - grafana
     mem: 8
     cpu: 4
     disk: 20

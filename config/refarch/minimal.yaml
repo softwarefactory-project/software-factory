@@ -10,6 +10,7 @@ inventory:
       - managesf
       - gerrit
       - zuul
+      - zuul-merger
       - jenkins
     mem: 8
     cpu: 4

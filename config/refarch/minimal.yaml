@@ -10,7 +10,9 @@ inventory:
       - managesf
       - gerrit
       - zuul
+      - zuul-merger
       - jenkins
+      - mosquitto
     mem: 8
     cpu: 4
     disk: 20

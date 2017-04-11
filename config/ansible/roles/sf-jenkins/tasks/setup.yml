@@ -1,5 +1,5 @@
 ---
-- include: /etc/ansible/tasks/create_user.yml user_name=jenkins ssh_key=jenkins_rsa
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=jenkins ssh_key=jenkins_rsa"
 
 - name: Create working directories
   file:

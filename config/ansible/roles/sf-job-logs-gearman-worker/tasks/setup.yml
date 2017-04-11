@@ -1,5 +1,5 @@
 ---
-- include: /etc/ansible/tasks/create_user.yml user_name=joblogsworker
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=joblogsworker"
 
 - name: "Install log gearman worker configuration"
   template: src=templates/jenkins-log-worker.yaml.j2 dest=/etc/log-gearman-worker/config.yml owner=joblogsworker group=joblogsworker

@@ -22,7 +22,7 @@ function ansible_install {
     - { role: "$role", action: "install", $params }
 EOF
     echo "ansible_install: installing $role with \"${params}\""
-    do_chroot ${dir} ansible-playbook $ansible_debug -e "${ANSIBLE_EXTRA_VARS}" /ansible-install-playbook
+    do_chroot ${dir} env ANSIBLE_CONFIG=/usr/share/sf-config/ansible/ansible.cfg ansible-playbook $ansible_debug -e "${ANSIBLE_EXTRA_VARS}" /ansible-install-playbook
     checkpoint "$role installed (ansible)"
 }
 

@@ -5,14 +5,14 @@
 - hosts: localhost
   connection: local
   tasks:
-    - include: tasks/ssh_populate_known_hosts.yml
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/ssh_populate_known_hosts.yml"
 
 
 # TODO: Fix fqdn update to work on distributed arch
 - hosts: managesf
   gather_facts: no
   tasks:
-    - include: tasks/update_fqdn_step1.yaml
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/update_fqdn_step1.yaml"
 
 # Setup install-server ssh keys
 - hosts: localhost
@@ -53,4 +53,9 @@
 - hosts: managesf
   gather_facts: no
   tasks:
-    - include: tasks/update_fqdn_step2.yaml
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/update_fqdn_step2.yaml"
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/create_config-repo.yml"
+
+- include: sf_configrepo_update.yml
+
+- include: sf_postconf.yml

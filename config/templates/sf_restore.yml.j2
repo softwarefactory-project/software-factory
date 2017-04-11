@@ -40,7 +40,7 @@
 - hosts: localhost
   tasks:
     - name: "Re-run sfconfig.py"
-      shell: sfconfig.py &>> /var/log/software-factory/sfconfig-restore.log
+      shell: sfconfig.py --skip-install &>> /var/log/software-factory/sfconfig-restore.log
 
     - name: "Signal journald"
       command: "logger sf_restore.yml: ended"

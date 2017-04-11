@@ -21,7 +21,7 @@ set -e
 CONF_TMP=$(mktemp -d)
 git clone git+ssh://{{ fqdn }}/config ${CONF_TMP}
 
-rsync -av /usr/local/share/sf-config-repo/ ${CONF_TMP}/ \
+rsync -av /usr/share/sf-config/config-repo/ ${CONF_TMP}/ \
       --exclude jobs/projects.yaml \
       --exclude policies/policy.yaml \
       --exclude zuul/projects.yaml \

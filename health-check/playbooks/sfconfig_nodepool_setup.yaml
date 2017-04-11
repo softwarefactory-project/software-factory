@@ -25,7 +25,7 @@
 
     - name: "Restart sfconfig"
       when: provider_config.rc != 0
-      command: sfconfig.py
+      command: sfconfig.py --skip-install
 
 - hosts: nodepool
   tasks:

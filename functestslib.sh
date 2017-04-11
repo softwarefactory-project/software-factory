@@ -202,10 +202,8 @@ function build_image {
         echo "            To update requirements and do a full installation, do not use SKIP_BUILD"
         set -e
         sudo rsync -a --delete --no-owner -L config/defaults/ ${IMAGE_PATH}/etc/software-factory/
-        sudo rsync -a --delete --no-owner -L config/defaults/ ${IMAGE_PATH}/usr/local/share/sf-default-config/
-        sudo rsync -a --delete --no-owner config/ansible/ ${IMAGE_PATH}/etc/ansible/
+        sudo rsync -a --delete --no-owner config/ ${IMAGE_PATH}/usr/share/sf-config
         sudo rsync -a --delete --no-owner health-check/ ${IMAGE_PATH}/etc/ansible/health-check/
-        sudo rsync -a --delete --no-owner config/config-repo/ ${IMAGE_PATH}/usr/local/share/sf-config-repo/
         sudo rsync -a --delete --no-owner serverspec/ ${IMAGE_PATH}/etc/serverspec/
         sudo rsync -a config/scripts/ ${IMAGE_PATH}/usr/local/bin/
         sudo cp image/edeploy/edeploy ${IMAGE_PATH}/usr/sbin/edeploy
@@ -270,7 +268,7 @@ function get_logs {
     set +e
 
     # Run get_logs from install-server and copy resulting logs
-    ssh ${SF_HOST} ansible-playbook /etc/ansible/get_logs.yml &> ${ARTIFACTS_DIR}/get_logs.log && \
+    ssh ${SF_HOST} ansible-playbook /var/lib/software-factory/ansible/get_logs.yml &> ${ARTIFACTS_DIR}/get_logs.log && \
     rsync -avi ${SF_HOST}:sf-logs/ ${ARTIFACTS_DIR}/ &>> ${ARTIFACTS_DIR}/get_logs.log || {
         cat ${ARTIFACTS_DIR}/get_logs.log; echo "get_logs failed...";
     }
@@ -333,10 +331,10 @@ function fail {
 function fetch_bootstraps_data {
     echo "[+] Fetch bootstrap data"
     rm -Rf sf-bootstrap-data
-    # TODO(2.4.0): remove bellow line
-    rsync -a -L ${SF_HOST}:/root/sf-bootstrap-data/ sf-bootstrap-data/ 2> /dev/null || :
     rsync -a -L ${SF_HOST}:/var/lib/software-factory/bootstrap-data/ sf-bootstrap-data/
-    scp ${SF_HOST}:/etc/ansible/group_vars/all.yaml sf-bootstrap-data/
+    # TODO(2.5.0): remove bellow line
+    scp ${SF_HOST}:/etc/ansible/group_vars/all.yaml sf-bootstrap-data/ || :
+    scp ${SF_HOST}:/var/lib/software-factory/ansible/group_vars/all.yaml sf-bootstrap-data/ || :
     ADMIN_PASSWORD=$(awk '/admin_password:/ {print $2}' sf-bootstrap-data/all.yaml)
     export REQUESTS_CA_BUNDLE="$(pwd)/sf-bootstrap-data/certs/localCA.pem"
 }
@@ -352,7 +350,7 @@ function run_bootstraps {
 import json
 import yaml
 import os
-f = '/usr/local/share/sf-config-repo/policies/policy.yaml'
+f = '/usr/share/sf-config/config-repo/policies/policy.yaml'
 if not os.path.isfile(f):
     exit(0)
 d = yaml.load(open(f))
@@ -366,7 +364,9 @@ d = yaml.load(open(f))
 d['debug'] = True
 yaml.dump(d, open(f, 'w'), default_flow_style=False)
 SCRIPT
-    ssh -A -tt ${SF_HOST} "sfconfig.sh || sfconfig.py" &> ${ARTIFACTS_DIR}/sfconfig.log \
+    CMD="sfconfig.py --skip-install"
+    [ "${TEST_TYPE}" == "upgrade" ] && [ "${PREVIOUS_VER}" == "2.4.0" ] && CMD="sfconfig.py"
+    ssh -A -tt ${SF_HOST} ${CMD} &> ${ARTIFACTS_DIR}/sfconfig.log \
         && echo "sfconfig.py: SUCCESS"  \
         || { kill -9 $SSH_AGENT_PID; fail "sfconfig.py failed" ${ARTIFACTS_DIR}/sfconfig.log; }
     kill -9 $SSH_AGENT_PID
@@ -445,7 +445,7 @@ function run_backup_restore {
     echo "$(date) ======= run_backup_restore"
     # TODO: replace by sfmanager command
     scp sf_backup.tar.gz ${SF_HOST}:/root/backup.tar.gz
-    ssh ${SF_HOST} ansible-playbook -vv -e "backup_file=/root/backup.tar.gz" /etc/ansible/sf_restore.yml &> ${ARTIFACTS_DIR}/restore.log || fail "Backup restore failed"
+    ssh ${SF_HOST} ansible-playbook -vv -e "backup_file=/root/backup.tar.gz" /var/lib/software-factory/ansible/sf_restore.yml &> ${ARTIFACTS_DIR}/restore.log || fail "Backup restore failed"
     fetch_bootstraps_data
     checkpoint "run_backup_restore"
 }
@@ -484,7 +484,7 @@ function change_fqdn {
 
 function run_sfconfig {
     echo "$(date) ======= run_sfconfig"
-    ssh ${SF_HOST} "sfconfig.sh || sfconfig.py" &> ${ARTIFACTS_DIR}/last_sfconfig.py || fail "sfconfig.py failed" ${ARTIFACTS_DIR}/last_sfconfig.py
+    ssh ${SF_HOST} sfconfig.py --skip-install &> ${ARTIFACTS_DIR}/last_sfconfig.py || fail "sfconfig.py failed" ${ARTIFACTS_DIR}/last_sfconfig.py
     checkpoint "run_sfconfig"
 }
 

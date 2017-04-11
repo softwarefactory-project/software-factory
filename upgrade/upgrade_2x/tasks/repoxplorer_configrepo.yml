@@ -9,8 +9,8 @@
     command: chdir=/root/config {{ item }}
     with_items:
       - mkdir repoxplorer
-      - cp {{install_path}}/softwarefactory/usr/local/share/sf-config-repo/repoxplorer/projects.yaml repoxplorer/
-      - cp {{install_path}}/softwarefactory/usr/local/share/sf-config-repo/repoxplorer/idents.yaml repoxplorer/
+      - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/repoxplorer/projects.yaml repoxplorer/
+      - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/repoxplorer/idents.yaml repoxplorer/
 
   - name: Change default fqdn in default repoxplorer projects.yaml file
     replace:

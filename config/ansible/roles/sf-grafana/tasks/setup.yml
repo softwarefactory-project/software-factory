@@ -1,5 +1,5 @@
 ---
-- include: /etc/ansible/tasks/create_user.yml user_name=grafana
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=grafana"
 
 - name: "Setup grafana.ini"
   template: src=grafana.ini.j2 dest=/etc/grafana/grafana.ini

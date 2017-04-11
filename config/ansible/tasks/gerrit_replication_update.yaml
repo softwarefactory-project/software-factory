@@ -1,5 +1,5 @@
 ---
-- include: update_configrepo.yaml
+- include: "{{ sf_tasks_dir }}/update_configrepo.yaml"
 
 - stat: path=/root/config/gerrit/replication.config
   register: rstat

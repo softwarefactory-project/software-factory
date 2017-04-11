@@ -9,7 +9,7 @@ This is a list of good practices to fix and follow:
 
 * Do not use root user to run a service or action of any kind.
   Instead always create a user:
-    - include: /etc/ansible/tasks/create_user.yml user_name=mirror2swift
+    - include: "{{ sf_tasks_dir }}/create_user.yml" user_name=mirror2swift
 
   Then either configure the service to run as this user, either
   perform ansible task using:

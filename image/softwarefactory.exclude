@@ -49,12 +49,12 @@
 /var/tmp/
 
 # Sf state data
-/etc/ansible/hosts
 /root/sf-bootstrap-data/
 /root/software-factory/
 /root/config/
 /var/lib/software-factory/bootstrap-data/
 /var/lib/software-factory/backup/
+/var/lib/software-factory/ansible/
 /var/lib/zuul/
 /var/lib/umurmurd/
 /var/lib/managesf/users.db

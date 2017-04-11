@@ -1,5 +1,5 @@
 ---
-- include: /etc/ansible/tasks/create_user.yml user_name=etherpad
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=etherpad"
 
 - name: Apply selinux port labelling
   seport:

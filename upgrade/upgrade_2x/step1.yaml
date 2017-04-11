@@ -38,7 +38,7 @@
     - name: "Migrate nodepool configuration"
       command: chdir=/root/config {{ item }}
       with_items:
-        - rsync -a {{install_path}}/softwarefactory/usr/local/share/sf-config-repo/nodepool/elements/ nodepool/elements/
+        - rsync -a {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/nodepool/elements/ nodepool/elements/
         - python /root/sf-nodepool-conf-migrator.py
         - git add nodepool/nodepool.yaml nodepool/elements nodepool/scripts
         - git commit -a -m "Update nodepool configuration"

@@ -1,6 +1,6 @@
 ---
 # Use 0751 to let apache access /var/lib/zuul/git
-- include: /etc/ansible/tasks/create_user.yml user_name=zuul ssh_key=jenkins_rsa home_dir_mode=0751
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=zuul ssh_key=jenkins_rsa home_dir_mode=0751"
 
 - name: Apply selinux port labelling
   seport:

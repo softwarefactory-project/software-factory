@@ -11,7 +11,7 @@
 
 - hosts: all
   tasks:
-    - include: tasks/update_configrepo.yaml
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/update_configrepo.yaml"
 
 - hosts: jenkins
   roles:
@@ -40,7 +40,7 @@
 - hosts: gerrit
   tasks:
     # TODO: move this task to a replication role update action
-    - include: tasks/gerrit_replication_update.yaml
+    - include: "{{'{{'}} sf_tasks_dir {{'}}'}}/gerrit_replication_update.yaml"
   roles:
     - {role: 'sf-gerrit', action: 'update'}
 

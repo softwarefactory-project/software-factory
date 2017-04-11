@@ -229,6 +229,9 @@ ROLE=softwarefactory
 RSERV_PORT=873
 RSERV=managesf
 EOF
+
+    # Make sure final image use latest ids.tables
+    cp ./C7.0-ids.tables ${dir}/etc/ids.tables
 }
 
 install_serverspec() {
@@ -238,15 +241,12 @@ install_serverspec() {
     fi
 }
 
-function copy_sf_ansible_roles {
-    rsync --delete -a --no-owner ./../config/ansible/ ${dir}/etc/ansible/
-}
-
 image_clean() {
+    rm -Rf ${dir}/var/lib/software-factory/ansible/facts/*
     rm -Rf ${dir}/usr/share/info
     rm -Rf ${dir}/share ${dir}/usr/share/backgrounds
     rm -Rf ${dir}/usr/local/share/gems/cache ${dir}/usr/local/share/gems/doc
-    rm -Rf ${dir}/root/.cache
+    rm -Rf ${dir}/root/.cache ${dir}/root/.ansible
     rm -Rf ${dir}/root/.npm
     rm -Rf ${dir}/root/.gem
     rm -Rf ${dir}/root/.rpmdb
@@ -265,31 +265,28 @@ fix_ansible_issue5504() {
     sed -i "s/after=remote_head, //" ${dir}/usr/lib/python2.7/site-packages/ansible/modules/core/source_control/git.py
 }
 
-function install_sf {
+function install_sf_config {
     set -e
 
     mkdir -p ${dir}/usr/src
 
-    # Make sure final image use latest ids.tables
-    cp ./C7.0-ids.tables ${dir}/etc/ids.tables
-
-    # Disable postfix, NetworkManager and Firewalld
-    do_chroot ${dir} systemctl disable postfix NetworkManager firewalld
-
-    # Install ansible playbooks and configuration files
-    do_chroot ${dir} mkdir -p /etc/software-factory
+    # Install ci things
     rsync --delete -a --no-owner ./../serverspec/ ${dir}/etc/serverspec/
-
-    # Sf-config
-    rsync -a --no-owner ./../config/scripts/ ${dir}/usr/local/bin/
-    rsync --delete -a -L --no-owner ./../config/defaults/ ${dir}/etc/software-factory/
-    rsync --delete -a -L --no-owner ./../config/defaults/ ${dir}/usr/local/share/sf-default-config/
-    rsync --delete -a --no-owner ./../config/ansible/ ${dir}/etc/ansible/
-    mkdir -p ${dir}/etc/software-factory ${dir}/etc/ansible/group_vars ${dir}/var/lib/ansible
     rsync --delete -a --no-owner ./../health-check/ ${dir}/etc/ansible/health-check/
 
-    rsync -a --delete ./../config/config-repo/ ${dir}/usr/local/share/sf-config-repo/
+    # TODO: remove after sf-config is packaged
+    echo "${VER}" > ${dir}/etc/sf-release
+    rsync -a --no-owner ./../config/scripts/ ${dir}/usr/local/bin/
+    rsync --delete -a -L --no-owner ./../config/defaults/ ${dir}/etc/software-factory/
+    rsync --delete -a -L --no-owner ./../config/ ${dir}/usr/share/sf-config/
+
+    # TODO: package sf-jenkins-slave-tools
     rsync -a --delete ./../tools/slaves/ ${dir}/usr/local/share/sf-jenkins-slave-tools/
+}
+
+function image_finalize {
+    # Disable postfix, NetworkManager and Firewalld
+    do_chroot ${dir} systemctl disable postfix NetworkManager firewalld
 
     do_chroot ${dir} find /root /var/www /srv/ -name "*.pyc" -exec rm {} \;
 
@@ -334,7 +331,7 @@ build_all() {
     install_serverspec
     checkpoint "edeploy, serverspect installed"
     remove_obsolete
-    copy_sf_ansible_roles
+    install_sf_config
     ansible_install sf-base
     ansible_install sf-install-server
     ansible_install sf-mysql
@@ -367,11 +364,11 @@ build_all() {
     ansible_install sf-ochlero
     ansible_install sf-collectd
     ansible_install sf-influxdb "${INFLUXDB_EXTRA_VARS}"
-    install_sf
     checkpoint "sf installed"
     do_chroot ${dir} yum update -y ${INSTALL_OPTIONS} --exclude="python2-passlib jenkins"
     do_chroot ${dir} yum update -y --disablerepo=* --enablerepo=grafana,logstash,kibana,elastic
     checkpoint "image final update"
+    image_finalize
     image_clean
     checkpoint "image cleaned"
     put_git_mark ${dir}

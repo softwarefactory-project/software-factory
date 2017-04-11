@@ -80,19 +80,11 @@ def load_refarch(filename, domain=None, install_server_ip=None):
     arch["roles"] = {}
     # hosts_files is a dict with host ip as key and hostname list as value
     arch["hosts_file"] = {}
-    # ip_prefix is used as network cidr, it's the first 3 bytes of all ips
-    ip_prefix = None
-    hostid = 10
     for host in arch["inventory"]:
         if install_server_ip and "install-server" in host["roles"]:
             host["ip"] = install_server_ip
         elif "ip" not in host:
-            host["ip"] = "192.168.135.1%d" % hostid
-
-        if not ip_prefix:
-            ip_prefix = '.'.join(host["ip"].split('.')[0:3])
-        elif ip_prefix != '.'.join(host["ip"].split('.')[0:3]):
-            fail("%s: Host is not on the correct network" % host["name"])
+            fail("%s: host '%s' needs an ip" % (filename, host["name"]))
 
         host["hostname"] = "%s.%s" % (host["name"], arch["domain"])
         # aliases is a list of cname for this host.
@@ -109,14 +101,6 @@ def load_refarch(filename, domain=None, install_server_ip=None):
             aliases.add("%s.%s" % (role, arch["domain"]))
             aliases.add(role)
         arch["hosts_file"][host["ip"]] = [host["hostname"]] + list(aliases)
-        # Set minimum requirement
-        host.setdefault("cpu", "1")
-        host.setdefault("mem", "4")
-        host.setdefault("disk", "10")
-        # Add id for network device name
-        host["hostid"] = hostid
-        hostid += 1
-    arch["ip_prefix"] = ip_prefix
 
     # Check roles
     for requirement in required_roles:
@@ -348,9 +332,7 @@ def clean_arch(data):
 
 
 def get_sf_version():
-    return filter(lambda x: x.startswith("VERS="),
-                  open("/var/lib/edeploy/conf").readlines()
-                  )[0].strip().split('-')[1]
+    return open("/etc/sf-release").read().strip()
 
 
 def generate_role_vars(arch, sfconfig, allvars_file, args):
@@ -365,8 +347,8 @@ def generate_role_vars(arch, sfconfig, allvars_file, args):
     # Generate all variable when the value is CHANGE_ME
     defaults = {}
     for role in arch["roles"]:
-        role_vars = yaml_load("%s/roles/sf-%s/defaults/main.yml" % (
-                              args.ansible_root, role))
+        role_vars = yaml_load("%s/ansible/roles/sf-%s/defaults/main.yml" % (
+                              args.share, role))
         defaults.update(role_vars)
         for key, value in role_vars.items():
             if str(value).strip().replace('"', '') == 'CHANGE_ME':
@@ -374,7 +356,10 @@ def generate_role_vars(arch, sfconfig, allvars_file, args):
                     secrets[key] = str(uuid.uuid4())
 
     # Generate dynamic role variable in the glue dictionary
-    glue = {'mysql_databases': {}}
+    glue = {'mysql_databases': {},
+            'sf_tasks_dir': "%s/ansible/tasks" % args.share,
+            'sf_templates_dir': "%s/templates" % args.share,
+            'sf_playbooks_dir': "%s" % args.ansible_root}
 
     def get_hostname(role):
         if len(arch["roles"][role]) != 1:
@@ -624,7 +609,7 @@ DNS.1 = %s
     yaml_dump(glue, allvars_file)
 
 
-def generate_inventory_and_playbooks(arch, ansible_root):
+def generate_inventory_and_playbooks(arch, ansible_root, share):
     # Adds playbooks to architecture
     firehose = "firehose" in arch["roles"]
     for host in arch["inventory"]:
@@ -659,43 +644,27 @@ def generate_inventory_and_playbooks(arch, ansible_root):
             if "zuul" in host["roles"] or "nodepool" in host["roles"]:
                 host["rolesname"].append("sf-ochlero")
 
-    templates = "%s/templates" % ansible_root
+    templates = "%s/templates" % share
 
     # Generate inventory
     render_template("%s/hosts" % ansible_root,
                     "%s/inventory.j2" % templates,
                     arch)
 
-    # Generate inventory
-    render_template("%s/get_logs.yml" % ansible_root,
-                    "%s/get_logs.yml.j2" % templates,
-                    arch)
+    # Generate playbooks
+    for playbooks in ("sf_install", "sf_setup", "sf_postconf",
+                      "sf_configrepo_update",
+                      "get_logs", "sf_backup", "sf_restore"):
+        render_template("%s/%s.yml" % (ansible_root, playbooks),
+                        "%s/%s.yml.j2" % (templates, playbooks),
+                        arch)
 
-    # Generate main playbook
-    render_template("%s/sf_setup.yml" % ansible_root,
-                    "%s/sf_setup.yml.j2" % templates,
-                    arch)
-
-    render_template("%s/sf_postconf.yml" % ansible_root,
-                    "%s/sf_postconf.yml.j2" % templates,
-                    arch)
-
-    render_template("%s/sf_backup.yml" % ansible_root,
-                    "%s/sf_backup.yml.j2" % templates,
-                    arch)
-
-    render_template("%s/sf_restore.yml" % ansible_root,
-                    "%s/sf_restore.yml.j2" % templates,
-                    arch)
-
-    render_template("%s/sf_configrepo_update.yml" % ansible_root,
-                    "%s/sf_configrepo_update.yml.j2" % templates,
-                    arch)
-
+    # Generate server spec hosts file
     render_template("/etc/serverspec/hosts.yaml",
                     "%s/serverspec.yml.j2" % templates,
                     arch)
 
+    # Generate /etc/hosts file
     render_template("/etc/hosts",
                     "%s/etc-hosts.j2" % templates,
                     arch)
@@ -703,28 +672,46 @@ def generate_inventory_and_playbooks(arch, ansible_root):
 
 def usage():
     p = argparse.ArgumentParser()
-    p.add_argument("--ansible_root", default="/etc/ansible")
-    p.add_argument("--sfconfig", default="/etc/software-factory/sfconfig.yaml")
-    p.add_argument("--extra", default="/etc/software-factory/custom-vars.yaml")
-    p.add_argument("--lib", default="/var/lib/software-factory/bootstrap-data")
-    p.add_argument("--arch", default="/etc/software-factory/arch.yaml")
+    # inputs
+    p.add_argument("--arch", default="/etc/software-factory/arch.yaml",
+                   help="The architecture file")
+    p.add_argument("--sfconfig", default="/etc/software-factory/sfconfig.yaml",
+                   help="The configuration file")
+    p.add_argument("--extra", default="/etc/software-factory/custom-vars.yaml",
+                   help="Extra ansible variable file")
+    p.add_argument("--share", default="/usr/share/sf-config",
+                   help="Templates and ansible roles")
+    # outputs
+    p.add_argument("--ansible_root",
+                   default="/var/lib/software-factory/ansible",
+                   help="Generated playbook output directory")
+    p.add_argument("--lib", default="/var/lib/software-factory/bootstrap-data",
+                   help="Deployment secrets output directory")
+    # tunning
+    p.add_argument("--skip-install", default=False, action='store_true',
+                   help="Do not call install tasks")
+    p.add_argument("--skip-setup", default=False, action='store_true',
+                   help="Do not call setup tasks")
     return p.parse_args()
 
 
 def main():
     args = usage()
 
-    execute(["logger", "sfconfig.py: started"])
-    print("[%s] Running sfconfig.py" % time.ctime())
+    if not args.skip_setup:
+        execute(["logger", "sfconfig.py: started"])
+        print("[%s] Running sfconfig.py" % time.ctime())
 
     # Create required directories
     allyaml = "%s/group_vars/all.yaml" % args.ansible_root
-    for dirname in ("%s/group_vars" % args.ansible_root,
+    for dirname in (args.ansible_root,
+                    "%s/group_vars" % args.ansible_root,
+                    "%s/facts" % args.ansible_root,
                     args.lib,
                     "%s/ssh_keys" % args.lib,
                     "%s/certs" % args.lib):
         if not os.path.isdir(dirname):
-            os.makedirs(dirname, 0700)
+            os.makedirs(dirname, 0o700)
     if os.path.islink(allyaml):
         # Remove previously created link to sfconfig.yaml
         os.unlink(allyaml)
@@ -740,7 +727,7 @@ def main():
     # Process the arch file and render playbooks
     local_ip = pread(["ip", "route", "get", "8.8.8.8"]).split()[6]
     arch = load_refarch(args.arch, sfconfig['fqdn'], local_ip)
-    generate_inventory_and_playbooks(arch, args.ansible_root)
+    generate_inventory_and_playbooks(arch, args.ansible_root, args.share)
 
     # Generate group vars
     with open(allyaml, "w") as allvars_file:
@@ -752,10 +739,15 @@ def main():
         yaml_dump(arch, allvars_file)
 
     print("[+] %s written!" % allyaml)
-
-    execute(["ansible-playbook", "/etc/ansible/sf_initialize.yml"])
-    execute(["logger", "sfconfig.py: ended"])
-    print("""%s: SUCCESS
+    os.environ["ANSIBLE_CONFIG"] = "/usr/share/sf-config/ansible/ansible.cfg"
+    if not args.skip_install:
+        execute(["ansible-playbook",
+                 "/var/lib/software-factory/ansible/sf_install.yml"])
+    if not args.skip_setup:
+        execute(["ansible-playbook",
+                 "/var/lib/software-factory/ansible/sf_setup.yml"])
+        execute(["logger", "sfconfig.py: ended"])
+        print("""%s: SUCCESS
 
 Access dashboard: https://%s
 Login with admin user, get the admin password by running:

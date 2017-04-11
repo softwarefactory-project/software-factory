@@ -11,7 +11,7 @@
     - git reset --hard origin/master --
     - git clean -f -x -d
     - bash -c "[ -d /root/config/gerrit ] || mkdir /root/config/gerrit"
-    - cp {{install_path}}/softwarefactory/usr/local/share/sf-config-repo/gerrit/commentlinks.yaml gerrit
+    - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/gerrit/commentlinks.yaml gerrit
     - git add gerrit/commentlinks.yaml
     - git commit -m "Initialize gerrit commentlinks"
     - git push git+ssh://{{ fqdn }}/config master

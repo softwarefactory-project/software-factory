@@ -1,5 +1,5 @@
 ---
-- include: /etc/ansible/tasks/create_user.yml user_name=managesf ssh_key=service_rsa
+- include: "{{ sf_tasks_dir }}/create_user.yml user_name=managesf ssh_key=service_rsa"
 
 - name: "Create config directory"
   file: path=/etc/managesf state=directory mode=0750 group=managesf

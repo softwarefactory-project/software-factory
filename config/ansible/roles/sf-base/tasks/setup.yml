@@ -37,7 +37,7 @@
   when: ansible_virtualization_role != "guest"
 
 - name: "system: manage /etc/hosts"
-  template: src=/etc/ansible/templates/etc-hosts.j2 dest=/etc/hosts mode=0644
+  template: src="{{ sf_templates_dir }}/etc-hosts.j2" dest=/etc/hosts mode=0644
 
 - name: "system: remove unused ip address if present"
   known_hosts: name='[192.168.135.101]:29418' state=absent

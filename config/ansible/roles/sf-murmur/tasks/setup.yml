@@ -1,6 +1,6 @@
 ---
 - name: Create user
-  include: /etc/ansible/tasks/create_user.yml user_name=umurmurd
+  include: "{{ sf_tasks_dir }}/create_user.yml user_name=umurmurd"
 
 - name: Install config file
   template:

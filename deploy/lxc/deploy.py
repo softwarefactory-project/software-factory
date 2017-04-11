@@ -75,9 +75,6 @@ def prepare_role(base_path, name, ip, gateway, netmask="255.255.255.0"):
                 # Keep new version in place for faster upgrade tests
                 "--exclude", "/var/lib/sf/roles/install/",
                 # Keep TLS CA too
-                "--exclude", "/root/sf-bootstrap-data/certs/localCA.pem",
-                "--exclude", "/root/sf-bootstrap-data/certs/localCAkey.pem",
-                "--exclude", "/root/sf-bootstrap-data/certs/localCA.srl",
                 "--exclude", "%s/localCA.pem" % bootstrap_data_cert_path,
                 "--exclude", "%s/localCAkey.pem" % bootstrap_data_cert_path,
                 "--exclude", "%s/localCA.srl" % bootstrap_data_cert_path,
@@ -157,13 +154,15 @@ def init(arch, base, arch_raw):
     render_template("/var/lib/lxc/%s-network.xml" % args.domain,
                     "./libvirt-network.xml.j2", {
                         "domain": args.domain,
-                        "ip_prefix": arch["ip_prefix"],
                     })
 
+    host_id = 101
     for host in arch["inventory"]:
+        host["hostid"] = host_id - 90
         # Prepare host rootfs
-        prepare_role(base, host["hostname"], host["ip"],
-                     gateway="%s.1" % arch["ip_prefix"])
+        prepare_role(base, host["hostname"], "192.168.135.%d" % host_id,
+                     gateway="192.168.135.1")
+        host_id += 1
 
     # "cloud-init": copy sfarch file
     root = "/var/lib/lxc/%s/rootfs" % arch["install"]
@@ -179,7 +178,7 @@ def init(arch, base, arch_raw):
     # Clean known_hosts
     execute(["sed", "-i",
              "/home/%s/.ssh/known_hosts" % os.environ["SUDO_USER"], "-e",
-             "s/^%s\.[0-9].*$//" % arch["ip_prefix"]])
+             "s/^%s\.[0-9].*$//" % "192.168.135"])
 
 
 def start(arch):

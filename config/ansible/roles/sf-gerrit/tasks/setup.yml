@@ -1,7 +1,7 @@
 ---
 # Use real shell for replication tests. TODO: improve replication test and set /sbin/nologin shell
 - name: "Create gerrit user"
-  include: /etc/ansible/tasks/create_user.yml user_name=gerrit ssh_key=gerrit_service_rsa shell=/bin/bash
+  include: "{{ sf_tasks_dir }}/create_user.yml user_name=gerrit ssh_key=gerrit_service_rsa shell=/bin/bash"
 
 - name: "Chmod cgi file"
   file:
@@ -17,7 +17,7 @@
 - include_vars: "{{ item }}"
   with_first_found:
     - /root/config/gerrit/commentlinks.yaml
-    - /usr/local/share/sf-config-repo/gerrit/commentlinks.yaml
+    - /usr/share/sf-config/config-repo/gerrit/commentlinks.yaml
 
 - name: "Install configuration files"
   template:

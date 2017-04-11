@@ -5,6 +5,6 @@
 - name: "Fetch logs"
   synchronize: mode=pull src="/var/log/software-factory/" dest="{{ log_dest }}/log/"
   ignore_errors: True
-- name: "Fetch ansible group-vars logs"
-  synchronize: mode=pull src="/etc/ansible/group_vars/all.yaml" dest="{{ log_dest }}/group_vars_all.yaml"
+- name: "Fetch ansible configuration"
+  synchronize: mode=pull src="/var/lib/software-factory/ansible" dest="{{ log_dest }}/ansible"
   ignore_errors: True

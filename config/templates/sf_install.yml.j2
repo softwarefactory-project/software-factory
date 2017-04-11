@@ -1,0 +1,17 @@
+---
+# This file is managed by ansible, don't edit
+# This playbook calls install tasks of ansible roles.
+
+# Install sf-base role on all hosts
+- hosts: all
+  roles:
+    - {name: "sf-base", action: "install"}
+
+# Install all components
+{% for host in inventory %}
+- hosts: {{ host['hostname'] }}
+  roles:
+{% for role in host['rolesname'] %}    - {name: "{{ role }}", action: "install"{% if role == "sf-nodepool" %}, nodepool_services: {{ host["nodepool_services"] }}{% endif %}{% if role == "sf-zuul" %}, zuul_services: {{ host["zuul_services"] }}{% endif %}}
+{% endfor %}
+
+{% endfor %}

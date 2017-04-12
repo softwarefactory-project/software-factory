@@ -59,7 +59,7 @@ if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
 fi
 
 # zuul_swift_upload
-ZUUL_SWIFT_UPLOAD_URL="https://raw.githubusercontent.com/openstack-infra/project-config/master/jenkins/scripts/zuul_swift_upload.py"
+ZUUL_SWIFT_UPLOAD_URL="https://raw.githubusercontent.com/openstack-infra/project-config/ad662855ba1f6dc51022521439d1a399be21875e/jenkins/scripts/zuul_swift_upload.py"
 URL_LIST="${URL_LIST} ${ZUUL_SWIFT_UPLOAD_URL}"
 if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
     ZUUL_SWIFT_UPLOAD_URL="${SWIFT_CACHE}/zuul/zuul_swift_upload.py"

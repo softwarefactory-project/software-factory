@@ -263,6 +263,9 @@ remove_obsolete() {
     rm -Rf ${dir}/srv/gerritbot ${dir}/usr/src/gerritbot
     rm -Rf ${dir}/srv/lecm ${dir}/usr/src/lecm
     rm -Rf ${dir}/var/www/docs
+    if do_chroot ${dir} rpm -q software-factory-doc; then
+        do_chroot ${dir} rpm -evh software-factory-doc
+    fi
 }
 
 fix_ansible_issue5504() {

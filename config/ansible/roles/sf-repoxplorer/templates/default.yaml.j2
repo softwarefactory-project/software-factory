@@ -1,0 +1,15 @@
+project-templates:
+  default:
+    uri: https://{{ fqdn }}/r/%(name)s
+    branches:
+    - master
+    gitweb: https://{{ fqdn }}/r/gitweb?p=%(name)s.git;a=commitdiff;h=%%(sha)s;ds=sidebyside
+
+projects:
+  internal:
+    config:
+      template: default
+
+identities: {}
+
+groups: {}

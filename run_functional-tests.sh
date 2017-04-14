@@ -32,7 +32,7 @@ TEST_TYPE="${1:-functional}"
 # Backward compatibility with jjb jobs
 [ ${TEST_TYPE} == "1node-allinone" ] && TEST_TYPE=$2
 
-REFARCH_FILE=${SF_ARCH:-$(pwd)/config/refarch/allinone.yaml}
+REFARCH_FILE=${SF_ARCH:-$(pwd)/refarch/allinone.yaml}
 
 SF_TESTS=${SF_TESTS:-tests/functional}
 

@@ -34,10 +34,4 @@ find . -name "*.sh" -or -name "*.install" | grep -v '\.tox' | xargs bash8
 BASH8_ERRORS=$?
 echo
 
-echo "gerrit_repl_alias_helper.py tests"
-echo "~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~"
-(cd config/scripts/; sudo pip install mock; nosetests -v gerrit_repl_alias_helper.py)
-REPL_TOOL_ERRORS=$?
-echo
-
-exit $[${FLAKE8_ERRORS} + ${BASH8_ERRORS} + ${REPL_TOOL_ERRORS}];
+exit $[${FLAKE8_ERRORS} + ${BASH8_ERRORS}];

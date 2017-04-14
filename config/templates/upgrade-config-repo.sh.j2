@@ -29,8 +29,7 @@ rsync -av /usr/share/sf-config/config-repo/ ${CONF_TMP}/ \
       --exclude gerrit/replication.config \
       --exclude gerrit/commentlinks.yaml \
       --exclude gerritbot/channels.yaml \
-      --exclude resources/resources.yaml \
-      --exclude repoxplorer/*.yaml
+      --exclude resources/resources.yaml
 
 cd ${CONF_TMP}
 # Only perform the commit/review if the upgrade bring new modifications

@@ -133,6 +133,12 @@
           echo "[+] Checking syntax errors in policy file"
           python -c "import yaml; yaml.safe_load(open('policies/policy.yaml'))"
 
+          echo "[+] Checking syntax errors in repoxplorer definition files"
+          cat << EOF > config.py
+          db_path = 'repoxplorer/'
+          EOF
+          repoxplorer-config-validate --config config.py
+
           echo "[+] Checking resources changes"
           /usr/local/bin/resources.sh validate
 

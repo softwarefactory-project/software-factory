@@ -14,7 +14,7 @@
     - name: Update sfconfig
       when: provider_config.rc != 0
       command: >
-        hieraedit.py --yaml /etc/software-factory/sfconfig.yaml --eval nodepool "{
+        /usr/share/sf-config/scripts/hieraedit.py --yaml /etc/software-factory/sfconfig.yaml --eval nodepool "{
         'providers': [{
             'name': '{{ provider_name }}',
             'auth_url':   '{{ os_auth_url }}',

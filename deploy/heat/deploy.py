@@ -7,7 +7,17 @@ import argparse
 import os
 import yaml
 
-from sfconfig import load_refarch, render_template
+from jinja2 import FileSystemLoader
+from jinja2.environment import Environment
+
+
+def render_template(dest, template, data):
+    with open(dest, "w") as out:
+        loader = FileSystemLoader(os.path.dirname(template))
+        env = Environment(trim_blocks=True, loader=loader)
+        template = env.get_template(os.path.basename(template))
+        out.write("%s\n" % template.render(data))
+    print("[+] Created %s" % dest)
 
 
 def render():
@@ -37,14 +47,14 @@ parser = argparse.ArgumentParser()
 parser.add_argument("--version")
 parser.add_argument("--workspace", default="/var/lib/sf")
 parser.add_argument("--domain", default="sftests.com")
-parser.add_argument("--arch", default="../../config/refarch/allinone.yaml")
+parser.add_argument("--arch", default="../../refarch/allinone.yaml")
 parser.add_argument("--output")
 parser.add_argument("action", choices=[
     "init", "start", "stop", "restart", "render"], default="render")
 args = parser.parse_args()
 
 try:
-    arch = load_refarch(args.arch, args.domain)
+    arch = yaml.load(open(args.arch).read())
     arch_raw = yaml.load(open(args.arch).read())
     filename = args.output
     if not filename:
@@ -56,6 +66,15 @@ try:
 except IOError:
     print "Invalid arch: %s" % args.arch
     exit(1)
+
+# Process arch
+arch["domain"] = args.domain
+for host in arch["inventory"]:
+    host["hostname"] = "%s.%s" % (host["name"], args.domain)
+    if "gateway" in host["roles"]:
+        arch["gateway_ip"] = host["ip"]
+    if "install-server" in host["roles"]:
+        arch["install"] = host["hostname"]
 
 if args.action == "start":
     start()

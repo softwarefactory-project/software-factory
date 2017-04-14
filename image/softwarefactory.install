@@ -32,7 +32,7 @@ if test -f /var/lib/sf/zuul-rpm-build/repodata/repomd.xml; then
 fi
 
 if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
-    ENABLED_REPOS+="sfbase,sfextras,sfupdates,sfepel,sfrdo,sfmaster"
+    ENABLED_REPOS+="sfbase,sfextras,sfupdates,sfepel,sfrdo,sfops,sfmaster"
     DISABLED_REPOS="*"
     INSTALL_OPTIONS="--disablerepo=${DISABLED_REPOS} --enablerepo=${ENABLED_REPOS}"
     ANSIBLE_EXTRA_VARS="yum_disable_repo=* yum_enable_repo=${ENABLED_REPOS}"
@@ -163,6 +163,12 @@ gpgcheck=1
 enabled=0
 exclude=python2-jenkins-job-builder
 
+[sfops]
+name=opstools
+baseurl=http://46.231.132.68:8080/v1/AUTH_b50e80d3969f441a8b7b1fe831003e0a/repomirror/opstools/
+gpgcheck=1
+enabled=0
+
 [sfmaster]
 name=SF master packages
 baseurl=http://46.231.133.231/kojifiles/repos/${SF_REPO}/
@@ -172,6 +178,7 @@ priority=110
 EOF
     # Check for testing packages
     if test -n "${TESTING_URL}"; then
+        echo "(STEP1) Using *${TESTING_URL}*"
         cat >> ${dir}/etc/yum.repos.d/sf-repos.repo << EOF
 [sftesting]
 name=SF testing packages
@@ -183,6 +190,7 @@ EOF
     fi
     # Check for local testing packages
     if test -n "${LOCAL_TESTING}"; then
+        echo "(STEP1) Using *${LOCAL_TESTING}*"
         cat >> ${dir}/etc/yum.repos.d/sf-repos.repo << EOF
 [sflocal-testing]
 name=SF local testing packages
@@ -199,12 +207,9 @@ EOF
 
     do_chroot ${dir} yum ${INSTALL_OPTIONS} group install -y "Minimal Install"
 
-    # python-virtualenv needed for venv creation
-    # mariadb-devel needed for Mysql-Python pip install
-    # gcc needed for pycrypto pip install
     # git/patch/tmux/vim-enhanced needed for comfort
     # python-flake8/python-nose needed for test_project_test
-    install_packages ${dir} grub2 ansible git patch python-virtualenv mariadb-devel gcc tmux vim-enhanced python-flake8 python-nose
+    install_packages ${dir} sf-release grub2 git patch tmux vim-enhanced python-flake8 python-nose
 
     # Quick and dirty fix for the current issue on RDO 20170223
     install_packages ${dir} python2-passlib-1.6.5
@@ -259,6 +264,7 @@ remove_obsolete() {
     rm -Rf ${dir}/srv/gerritbot ${dir}/usr/src/gerritbot
     rm -Rf ${dir}/srv/lecm ${dir}/usr/src/lecm
     rm -Rf ${dir}/var/www/docs
+    rm -Rf ${dir}/usr/local/bin/sfconfig.py ${dir}/etc/ansible/roles/*
 }
 
 fix_ansible_issue5504() {
@@ -270,15 +276,16 @@ function install_sf_config {
 
     mkdir -p ${dir}/usr/src
 
+    # Ensure sf-config is latest
+    if do_chroot ${dir} rpm -q sf-config; then
+        do_chroot ${dir} yum ${INSTALL_OPTIONS} update -y sf-config
+    else
+        do_chroot ${dir} yum ${INSTALL_OPTIONS} install -y sf-config
+    fi
+
     # Install ci things
     rsync --delete -a --no-owner ./../serverspec/ ${dir}/etc/serverspec/
     rsync --delete -a --no-owner ./../health-check/ ${dir}/etc/ansible/health-check/
-
-    # TODO: remove after sf-config is packaged
-    echo "${VER}" > ${dir}/etc/sf-release
-    rsync -a --no-owner ./../config/scripts/ ${dir}/usr/local/bin/
-    rsync --delete -a -L --no-owner ./../config/defaults/ ${dir}/etc/software-factory/
-    rsync --delete -a -L --no-owner ./../config/ ${dir}/usr/share/sf-config/
 
     # TODO: package sf-jenkins-slave-tools
     rsync -a --delete ./../tools/slaves/ ${dir}/usr/local/share/sf-jenkins-slave-tools/
@@ -323,7 +330,6 @@ build_all() {
     bootstrap
     checkpoint "bootstrapped"
     install_sf_packages
-    fix_ansible_issue5504
     checkpoint "sf dep packages installed"
     enable_selinux
     checkpoint "selinux configured"
@@ -332,6 +338,7 @@ build_all() {
     checkpoint "edeploy, serverspect installed"
     remove_obsolete
     install_sf_config
+    fix_ansible_issue5504
     ansible_install sf-base
     ansible_install sf-install-server
     ansible_install sf-mysql

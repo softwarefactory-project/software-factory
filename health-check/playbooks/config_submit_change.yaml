@@ -4,7 +4,7 @@
 - hosts: install-server
   tasks:
     - name: Submit and approve config change
-      command: chdir=/root/config submit_and_wait.py --approve
+      command: chdir=/root/config /usr/share/sf-config/scripts/submit_and_wait.py --approve
       register: submit_status
       ignore_errors: true
 

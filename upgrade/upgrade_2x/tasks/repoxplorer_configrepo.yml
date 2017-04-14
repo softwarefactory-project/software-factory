@@ -9,14 +9,7 @@
     command: chdir=/root/config {{ item }}
     with_items:
       - mkdir repoxplorer
-      - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/repoxplorer/projects.yaml repoxplorer/
-      - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/repoxplorer/idents.yaml repoxplorer/
-
-  - name: Change default fqdn in default repoxplorer projects.yaml file
-    replace:
-      dest: /root/config/repoxplorer/projects.yaml
-      regexp: 'sftests.com'
-      replace: '{{ fqdn }}'
+      - cp {{install_path}}/softwarefactory/usr/share/sf-config/config-repo/repoxplorer/README repoxplorer/
 
   - name: "Push repoxplorer directory in the config repo"
     command: chdir=/root/config {{ item }}

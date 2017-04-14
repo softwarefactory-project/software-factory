@@ -1,8 +1,4 @@
 ---
-- name: "Check repoxplorer version"
-  command: rpm -q --queryformat '%{VERSION}' repoxplorer
-  register: version
-
 - name: "Set Elasticsearch host"
   replace:
     dest: /etc/repoxplorer/config.py
@@ -14,20 +10,17 @@
     dest: /etc/repoxplorer/config.py
     regexp: "^db_default_file =.*$"
     replace: "db_default_file = '/etc/repoxplorer/default.yaml'"
-  when: version.stdout == '0.8.0'
 
 - name: "Install default index file for repoxplorer"
   template:
     src: default.yaml.j2
     dest: /etc/repoxplorer/default.yaml
     force: no
-  when: version.stdout == '0.8.0'
 
 - name: "Remove index.yaml example definition"
   file:
     path: /etc/repoxplorer/index.yaml
     state: absent
-  when: version.stdout == '0.8.0'
 
 - name: "Install top menu"
   lineinfile:

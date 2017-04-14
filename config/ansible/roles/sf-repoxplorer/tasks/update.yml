@@ -20,3 +20,6 @@
 - name: "Write config repo sha1 matching current repoxplorer configuration"
   copy: content="{{ upstreamconfig.stdout }}" dest=/var/lib/software-factory/repoxplorer_config
   when: localconfig.stdout != upstreamconfig.stdout
+
+- name: "Update default repoxplorer index file from SF resources"
+  command: /usr/local/bin/resources2repoxplorer.py apply

@@ -15,35 +15,11 @@
   tasks:
   - block:
 
-    - name: "Copy config file updater"
-      copy:
-        src: update-repoxplorer-config.py
-        dest: /tmp/update-repoxplorer-config.py
-
-    - name: "Update projects yaml file"
+    - name: "Remove repoXplorer previous configuration"
       command: chdir=/root/config {{ item }}
       with_items:
-        - python /tmp/update-repoxplorer-config.py repoxplorer/projects.yaml
-        - git add repoxplorer/projects.yaml
-
-    - name: "Check file has changes"
-      command: chdir=/root/config git --no-pager diff --name-only --staged
-      register: result
-
-    - name: "Push repoxplorer directory in the config repo"
-      command: chdir=/root/config {{ item }}
-      with_items:
-        - git commit -m "Update repoxplorer configuration"
-        - git push git+ssh://{{ fqdn }}/config master
-      when: "'projects.yaml' in result.stdout"
-
-    when: repoxplorer_version.stdout == '0.7.2'
-  - block:
-
-    - name: "Update projects yaml file"
-      command: chdir=/root/config {{ item }}
-      with_items:
-        - rm -f repoxplorer/*
+        - git rm -r repoxplorer
+        - mkdir repoxplorer
         - touch repoxplorer/.placeholder
         - git add repoxplorer
 
@@ -57,17 +33,6 @@
 
 - hosts: repoxplorer
   tasks:
-  - block:
-
-    - name: "Copy config file updater"
-      copy:
-        src: update-repoxplorer-config.py
-        dest: /tmp/update-repoxplorer-config.py
-
-    - name: "Update projects yaml file"
-      command: python /tmp/update-repoxplorer-config.py /etc/repoxplorer/projects.yaml
-
-    when: repoxplorer_version.stdout == '0.7.2'
   - block:
 
     - name: "Remove old index files"

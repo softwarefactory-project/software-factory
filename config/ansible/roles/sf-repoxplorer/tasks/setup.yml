@@ -28,6 +28,14 @@
     insertafter: '<%def name="javascript()">'
     line: '    <script src="/static/js/topmenu.js"></script>'
 
+- name: "Install resources2repoxplorer"
+  template:
+    src: "{{ item.name }}"
+    dest: /usr/local/bin/
+    mode: 0755
+  with_items:
+    - { name: resources2repoxplorer.py.j2 }
+
 - name: Start service
   systemd:
     name: "{{ item }}"

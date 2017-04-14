@@ -232,7 +232,7 @@ resources:
     type: OS::Cinder::Volume
     properties:
       image : { get_param: image_id }
-      size  : {{ host['disk'] }}
+      size  : {{ host['disk']|default(20) }}
 
   sf_{{ host['name'] }}_instance:
     type: OS::Nova::Server

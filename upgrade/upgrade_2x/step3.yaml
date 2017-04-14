@@ -33,4 +33,4 @@
   - include: tasks/allprojectsupdate.yml
   - include: tasks/update_configrepo.yaml
   - name: Propose replication.config in the config repo
-    shell: /usr/local/bin/propose_replication_config.sh
+    shell: /usr/share/sf-config/scripts/propose_replication_config.sh

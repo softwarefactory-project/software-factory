@@ -1,0 +1,8 @@
+---
+features:
+  - repoXplorer 0.8.0 has been integrated with groups support (see upstream changelog)
+  - repoXplorer config-update job will install default definition based on the resources definitions
+  - repoXplorer config/repoxplorer is now used to overwrite default definitions if needed and also to declare identities
+upgrade:
+  - repoXplorer configuration definition in config/repoxplorer will be removed as the format is deprecated
+  - repoXplorer EL index will be wiped and re-created automatically

@@ -35,8 +35,8 @@
   command: chdir=/root/config {{ item }}
   with_items:
     # Create default rules
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-start-update rule:admin_or_service
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-update-status rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-start-update rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-update-status rule:admin_or_service
 
 - name: Submit policy configuration changes
   when: configrepo_policies.stat.exists == true and ( grep_iu.rc == 0 or grep_new.rc == 1 )

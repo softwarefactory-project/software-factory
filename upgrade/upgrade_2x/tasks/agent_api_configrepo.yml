@@ -17,12 +17,12 @@
     - git reset --hard origin/master --
     - git clean -f -x -d
     # Create default rules
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:get rule:any
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:hold rule:admin_or_service
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:delete rule:admin_or_service
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-get rule:any
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-update rule:admin_or_service
-    - /usr/local/bin/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:add_authorized_key rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:get rule:any
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:hold rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:delete rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-get rule:any
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:image-update rule:admin_or_service
+    - /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/policies/policy.yaml managesf.node:add_authorized_key rule:admin_or_service
     - git add policies
     - git commit -m "Initialize job API policies"
     - git push git+ssh://{{ fqdn }}/config master

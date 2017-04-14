@@ -1,11 +1,11 @@
 <domain type='lxc'>
   <name>sf-{{ hostname }}</name>
-  <memory unit='GB'>{{ mem }}</memory>
+  <memory unit='GB'>{{ mem|default(8) }}</memory>
   <os>
     <type>exe</type>
     <init>/sbin/init</init>
   </os>
-  <vcpu>{{ cpu }}</vcpu>
+  <vcpu>{{ cpu|default(4) }}</vcpu>
   <clock offset='utc'/>
   <on_poweroff>destroy</on_poweroff>
   <on_reboot>restart</on_reboot>

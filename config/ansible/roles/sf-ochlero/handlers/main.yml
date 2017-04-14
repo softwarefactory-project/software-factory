@@ -1,3 +1,0 @@
----
-- name: restart ochlero
-  service: name=ochlero state=restarted

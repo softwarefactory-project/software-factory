@@ -32,7 +32,7 @@ TEST_TYPE="${1:-functional}"
 # Backward compatibility with jjb jobs
 [ ${TEST_TYPE} == "1node-allinone" ] && TEST_TYPE=$2
 
-REFARCH_FILE=${SF_ARCH:-$(pwd)/config/refarch/allinone.yaml}
+REFARCH_FILE=${SF_ARCH:-$(pwd)/refarch/allinone.yaml}
 
 SF_TESTS=${SF_TESTS:-tests/functional}
 
@@ -108,7 +108,7 @@ case "${TEST_TYPE}" in
         sleep 20
         run_provisioner
         # Copy new arch
-        scp config/refarch/allinone.yaml ${SF_HOST}:/etc/software-factory/arch.yaml
+        scp refarch/allinone.yaml ${SF_HOST}:/etc/software-factory/arch.yaml
         run_upgrade
         run_checker "checksum_warn_only"
         run_serverspec_tests

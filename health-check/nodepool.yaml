@@ -27,7 +27,7 @@
     - name: Adds nodepool providers
       when: sfconfiged.rc
       command: >
-        hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
+        /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
             'name': '{{ provider_name }}',
             'boot-timeout': 120,
             'clean-floating-ips': True,
@@ -49,7 +49,7 @@
     - name: Adds nodepool label
       when: sfconfiged.rc
       command: >
-        hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval labels "[{
+        /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval labels "[{
             'name': '{{ node }}',
             'image': '{{ image_name }}',
             'min-ready': 2,

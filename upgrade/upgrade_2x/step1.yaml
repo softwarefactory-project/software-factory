@@ -3,6 +3,15 @@
   pre_tasks:
   - include: tasks/remove_puppet.yaml
   tasks:
+  - name: "Check for hieraedit"
+    stat: path=/usr/share/sf-config/scripts/hieraedit.py
+    register: hieraedit
+  - name: "Check for scripts directory"
+    file: path=/usr/share/sf-config/scripts state=directory
+    when: hieraedit.stat.exists == False
+  - name: "Copy hieraedit from 2.4"
+    copy: src=/usr/local/bin/hieraedit.py dest=/usr/share/sf-config/scripts/hieraedit.py remote_src=true mode=0755
+    when: hieraedit.stat.exists == False
   - include: tasks/fetchupstream.yml
   - include: tasks/gerritbot_configrepo_import.yml
   - include: tasks/gerrit_configrepo_import.yml

@@ -134,7 +134,7 @@ users:
  - name: user2
  - name: user3
 commands:
-  - cmd: hieraedit.py --yaml /etc/software-factory/sfconfig.yaml safekey pc_test
+  - cmd: /usr/share/sf-config/scripts/hieraedit.py --yaml /etc/software-factory/sfconfig.yaml safekey pc_test
   - cmd: echo "adev:OpPzvAQ.RbXb6" > /etc/httpd/managesf_htpasswd
 checksum:
   - file: /etc/software-factory/sfconfig.yaml

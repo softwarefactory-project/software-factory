@@ -1,5 +1,0 @@
----
-- name: Restart collectd
-  service:
-      name: "{{ collectd_service }}"
-      state: restarted

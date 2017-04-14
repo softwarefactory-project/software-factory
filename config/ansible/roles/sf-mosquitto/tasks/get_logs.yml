@@ -1,4 +1,0 @@
----
-- name: "Fetch mosquitto config"
-  synchronize: mode=pull src="/etc/mosquitto/" dest="{{ log_dest }}/etc"
-  ignore_errors: True

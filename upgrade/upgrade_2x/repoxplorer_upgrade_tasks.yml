@@ -38,6 +38,22 @@
       when: "'projects.yaml' in result.stdout"
 
     when: repoxplorer_version.stdout == '0.7.2'
+  - block:
+
+    - name: "Update projects yaml file"
+      command: chdir=/root/config {{ item }}
+      with_items:
+        - rm -f repoxplorer/*
+        - touch repoxplorer/.placeholder
+        - git add repoxplorer
+
+    - name: "Push repoxplorer directory in the config repo"
+      command: chdir=/root/config {{ item }}
+      with_items:
+        - git commit -m "Update repoxplorer configuration"
+        - git push git+ssh://{{ fqdn }}/config master
+
+    when: repoxplorer_version.stdout == '0.8.0'
 
 - hosts: repoxplorer
   tasks:
@@ -52,6 +68,12 @@
       command: python /tmp/update-repoxplorer-config.py /etc/repoxplorer/projects.yaml
 
     when: repoxplorer_version.stdout == '0.7.2'
+  - block:
+
+    - name: "Remove old index files"
+      command: rm -f /etc/repoxplorer/projects.yaml /etc/repoxplorer/idents.yaml
+
+    when: repoxplorer_version.stdout == '0.8.0'
 
   - name: "Restart repoxplorer indexer"
     service: name=repoxplorer state=restarted

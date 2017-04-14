@@ -263,6 +263,7 @@ remove_obsolete() {
     rm -Rf ${dir}/srv/nodepool ${dir}/usr/src/nodepool
     rm -Rf ${dir}/srv/gerritbot ${dir}/usr/src/gerritbot
     rm -Rf ${dir}/srv/lecm ${dir}/usr/src/lecm
+    rm -Rf ${dir}/srv/repoxplorer
     rm -Rf ${dir}/var/www/docs
     rm -Rf ${dir}/usr/local/bin/sfconfig.py ${dir}/etc/ansible/roles/*
     if do_chroot ${dir} rpm -q software-factory-doc; then

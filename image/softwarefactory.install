@@ -270,15 +270,14 @@ function install_sf_config {
 
     mkdir -p ${dir}/usr/src
 
+    # Ensure sf-config is latest
+    if do_chroot ${dir} rpm -q sf-config; then
+    do_chroot ${dir} yum ${INSTALL_OPTIONS} install sf-config
+    do_chroot ${dir} yum ${INSTALL_OPTIONS} update sf-config
+
     # Install ci things
     rsync --delete -a --no-owner ./../serverspec/ ${dir}/etc/serverspec/
     rsync --delete -a --no-owner ./../health-check/ ${dir}/etc/ansible/health-check/
-
-    # TODO: remove after sf-config is packaged
-    echo "${VER}" > ${dir}/etc/sf-release
-    rsync -a --no-owner ./../config/scripts/ ${dir}/usr/local/bin/
-    rsync --delete -a -L --no-owner ./../config/defaults/ ${dir}/etc/software-factory/
-    rsync --delete -a -L --no-owner ./../config/ ${dir}/usr/share/sf-config/
 
     # TODO: package sf-jenkins-slave-tools
     rsync -a --delete ./../tools/slaves/ ${dir}/usr/local/share/sf-jenkins-slave-tools/

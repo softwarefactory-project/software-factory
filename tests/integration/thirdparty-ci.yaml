@@ -117,7 +117,7 @@
       command: sudo -u zuul ssh -p 29418 -o StrictHostKeyChecking=no downstream-zuul@upstream.com gerrit version
 
     - name: "Add gerrit_connections"
-      command: hieraedit.py --yaml /etc/software-factory/sfconfig.yaml --eval gerrit_connections "[{'name':'upstream', 'hostname':'upstream.com', 'puburl':'https://upstream.com/r/', 'username':'downstream-zuul'}]"
+      command: /usr/share/sf-config/scripts/hieraedit.py --yaml /etc/software-factory/sfconfig.yaml --eval gerrit_connections "[{'name':'upstream', 'hostname':'upstream.com', 'puburl':'https://upstream.com/r/', 'username':'downstream-zuul'}]"
 
     - name: "Restart sfconfig.py"
       shell: grep -q upstream /etc/zuul/zuul.conf || sfconfig.py --skip-install

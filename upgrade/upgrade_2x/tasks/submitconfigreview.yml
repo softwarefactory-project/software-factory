@@ -6,4 +6,4 @@
 # the upgrade.
 
 - name: Trigger upgrade config repo
-  shell: /usr/local/bin/upgrade-config-repo.sh
+  shell: /usr/share/sf-config/scripts/upgrade-config-repo.sh

@@ -24,6 +24,16 @@
   tasks:
   - include: tasks/remove_old_service_user.yml
 
+# Make sure no config-update job is running
+- hosts: jenkins
+  tasks:
+    - name: Wait for first config-update
+      when: "'repoxplorer' in roles"
+      wait_for:
+        path: /var/lib/jenkins/jobs/config-update/builds/lastStableBuild/log
+        search_regex: "^Finished. SUCCESS$"
+        timeout: 120
+
 - hosts: jenkins
   tasks:
   - include: tasks/submitconfigreview.yml

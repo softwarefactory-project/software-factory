@@ -44,6 +44,7 @@ dir="$1"
 # Version is SF_VER
 version="$2"
 
+sf_version="$(echo ${version} | tr -d- -f2)"
 dist="centos"
 CODENAME_MAJOR=7
 ROLE=softwarefactory

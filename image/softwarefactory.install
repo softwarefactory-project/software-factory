@@ -139,14 +139,6 @@ EOF
     chmod 0644 ${dir}/etc/sysconfig/network
 }
 
-enable_selinux() {
-    # Force SELinux relabel
-    touch ${dir}/.autorelabel
-
-    # TODO: replace "permissive" by "enforcing" once there are no more avc message
-    sed -i "s/^SELINUX=.*/SELINUX=permissive/" "${dir}/etc/selinux/config"
-}
-
 install_sf_packages() {
     cat >> ${dir}/etc/yum.repos.d/sf-mirror.repo <<EOF
 
@@ -202,33 +194,6 @@ EOF
     # git/patch/tmux/vim-enhanced needed for comfort
     # python-flake8/python-nose needed for test_project_test
     install_packages ${dir} sf-release grub2 git patch tmux vim-enhanced python-flake8 python-nose
-
-    # Quick and dirty fix for the current issue on RDO 20170223
-    install_packages ${dir} python2-passlib-1.6.5
-}
-
-install_edeploy() {
-    cat > ${dir}/etc/rsyncd.conf << EOF
-uid = root
-gid = root
-
-[install]
-path = /var/lib/debootstrap/install
-comment = eDeploy install trees
-
-[metadata]
-path = /var/lib/debootstrap/metadata
-comment = eDeploy metadata
-EOF
-    cat > ${dir}/var/lib/edeploy/conf << EOF
-VERS=${version}
-ROLE=softwarefactory
-RSERV_PORT=873
-RSERV=managesf
-EOF
-
-    # Make sure final image use latest ids.tables
-    cp ./C7.0-ids.tables ${dir}/etc/ids.tables
 }
 
 install_serverspec() {
@@ -327,11 +292,8 @@ build_all() {
     checkpoint "bootstrapped"
     install_sf_packages
     checkpoint "sf dep packages installed"
-    enable_selinux
-    checkpoint "selinux configured"
-    install_edeploy
     install_serverspec
-    checkpoint "edeploy, serverspect installed"
+    checkpoint "serverspect installed"
     remove_obsolete
     install_sf_config
     fix_ansible_issue5504
@@ -368,7 +330,7 @@ build_all() {
     ansible_install sf-collectd
     ansible_install sf-influxdb "${INFLUXDB_EXTRA_VARS}"
     checkpoint "sf installed"
-    do_chroot ${dir} yum update -y ${INSTALL_OPTIONS} --exclude="python2-passlib jenkins"
+    do_chroot ${dir} yum update -y ${INSTALL_OPTIONS} --exclude="jenkins"
     do_chroot ${dir} yum update -y --disablerepo=* --enablerepo=grafana,logstash,kibana,elastic
     checkpoint "image final update"
     image_finalize

@@ -139,14 +139,6 @@ EOF
     chmod 0644 ${dir}/etc/sysconfig/network
 }
 
-enable_selinux() {
-    # Force SELinux relabel
-    touch ${dir}/.autorelabel
-
-    # TODO: replace "permissive" by "enforcing" once there are no more avc message
-    sed -i "s/^SELINUX=.*/SELINUX=permissive/" "${dir}/etc/selinux/config"
-}
-
 install_sf_packages() {
     cat >> ${dir}/etc/yum.repos.d/sf-mirror.repo <<EOF
 
@@ -205,30 +197,6 @@ EOF
 
     # Quick and dirty fix for the current issue on RDO 20170223
     install_packages ${dir} python2-passlib-1.6.5
-}
-
-install_edeploy() {
-    cat > ${dir}/etc/rsyncd.conf << EOF
-uid = root
-gid = root
-
-[install]
-path = /var/lib/debootstrap/install
-comment = eDeploy install trees
-
-[metadata]
-path = /var/lib/debootstrap/metadata
-comment = eDeploy metadata
-EOF
-    cat > ${dir}/var/lib/edeploy/conf << EOF
-VERS=${version}
-ROLE=softwarefactory
-RSERV_PORT=873
-RSERV=managesf
-EOF
-
-    # Make sure final image use latest ids.tables
-    cp ./C7.0-ids.tables ${dir}/etc/ids.tables
 }
 
 install_serverspec() {
@@ -327,11 +295,8 @@ build_all() {
     checkpoint "bootstrapped"
     install_sf_packages
     checkpoint "sf dep packages installed"
-    enable_selinux
-    checkpoint "selinux configured"
-    install_edeploy
     install_serverspec
-    checkpoint "edeploy, serverspect installed"
+    checkpoint "serverspect installed"
     remove_obsolete
     install_sf_config
     fix_ansible_issue5504

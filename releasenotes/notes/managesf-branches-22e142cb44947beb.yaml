@@ -1,0 +1,3 @@
+---
+features:
+  - resources backend can be used to define repository branches and default branch

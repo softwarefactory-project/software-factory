@@ -344,6 +344,11 @@ class TestResourcesWorkflow(Base):
   repos:
     %s:
       description: test for functional test
+      default-branch: br1
+      branches:
+        br1: HEAD
+        br2: HEAD
+        master: '0'
 """
         # Add the resources file w/o review
         resources = resources % name
@@ -352,6 +357,19 @@ class TestResourcesWorkflow(Base):
                                             mode='add')
         # Check the project has been created
         self.assertTrue(self.gu.project_exists(name))
+        # Check branches
+        branches = self.gu.g.get('/projects/%s/branches/' % name)
+        for wref in ("HEAD", "br1", "br2"):
+            found = False
+            for ref in branches:
+                if found:
+                    continue
+                if ref['ref'].endswith(wref):
+                    found = True
+                    if ref['ref'] == 'HEAD' and ref['revision'] != "br1":
+                        raise Exception("Wrong default branch")
+            if not found:
+                raise Exception("Requested branch %s not found" % wref)
         # Del the resources file w/o review
         self.set_resources_then_direct_push(fpath,
                                             mode='del')

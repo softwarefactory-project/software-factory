@@ -464,8 +464,8 @@ function run_upgrade {
     review_id=$(./tools/get_last_autogen_upgrade_config_review.py https://${SF_HOST} "Upgrade of base config repository files")
     [ "$review_id" != "0" ] && {
         (
-            ssh ${SF_HOST} "cd config; /usr/share/sf-config/scripts/submit_and_wait.py --review-id $review_id --recheck"
-            ssh ${SF_HOST} "cd config; /usr/share/sf-config/scripts/submit_and_wait.py --review-id $review_id --approve"
+            ssh ${SF_HOST} "cd config; /usr/share/sf-config/scripts/submit_and_wait.py --debug --review-id $review_id --recheck"
+            ssh ${SF_HOST} "cd config; /usr/share/sf-config/scripts/submit_and_wait.py --debug --review-id $review_id --approve"
         ) || fail "Could not approve the auto generated config review"
     } || echo "No config review found"
 

@@ -6,8 +6,6 @@ Vagrant.configure(2) do |config|
 
   config.vm.network "public_network", bridge:
     ['wlp4s0', 'eth0']
-  config.vm.network "forwarded_port", guest: 80, host: 8080
-  config.vm.network "forwarded_port", guest: 29418, host: 29418
 
   config.ssh.forward_agent = true
 
@@ -44,9 +42,11 @@ Vagrant.configure(2) do |config|
 
     # Install prerequisites
     sudo yum install -y epel-release
-    sudo yum install -y libvirt libvirt-daemon-lxc git git-review vim-enhanced tmux curl python-devel wget python-pip mariadb-devel python-virtualenv python-devel gcc libffi-devel openldap-devel openssl-devel python-sphinx python-tox python-flake8 ansible squid
+    sudo yum install -y libvirt libvirt-daemon-lxc git git-review vim-enhanced tmux curl python-devel wget python-pip mariadb-devel python-virtualenv gcc libffi-devel openldap-devel openssl-devel python-sphinx python-tox python-flake8 ansible squid
     sudo systemctl enable libvirtd
     sudo systemctl start libvirtd
+    sudo yum install -y rpmdevtools createrepo mock python-jinja2
+    sudo /usr/sbin/usermod -a -G mock $USER
 
     # Add a local proxy
     sudo sed -ie 's/^http_port.*/http_port 127.0.0.1:3128/g' /etc/squid/squid.conf
@@ -54,12 +54,26 @@ Vagrant.configure(2) do |config|
     sudo systemctl enable squid
     sudo systemctl start squid
 
-    echo 'export http_proxy="http://127.0.0.1:3128/"' >> ~/.bashrc
-    echo 'export https_proxy="http://127.0.0.1:3128/"' >> ~/.bashrc
-
-    git clone http://softwarefactory-project.io/r/software-factory
-    cd software-factory
-    SKIP_GPG=1 ./fetch_image.sh
+    mkdir software-factory
+    sudo mkdir -p /var/lib/sf/zuul-rpm-build
+    cd software-factory && git clone https://softwarefactory-project.io/r/software-factory/sfinfo
+    sudo cp -v sfinfo/rpm-gpg/* /etc/pki/rpm-gpg/
+    # TODO make this independent from version
+    sudo yum install -y https://softwarefactory-project.io/repos/sf-release-2.5.rpm
+    sudo yum install -y zuul-cloner
+    for repo in $(python << EOF
+import yaml
+repos = yaml.load(open('sfinfo/sf-master.yaml'))
+for r in repos['packages']:
+    suffix = r['name']
+    if r['source'] == 'external':
+        suffix += '-distgit'
+    print suffix
+    if 'distgit' in r:
+        print r['distgit']
+EOF); do
+      git clone https://softwarefactory-project.io/r/$repo || (cd /home/vagrant/$repo && git fetch --all && cd -);
+    done
 
     # install GUI testing tools
     sudo yum install -y firefox Xvfb libXfont Xorg jre
@@ -73,8 +87,14 @@ Vagrant.configure(2) do |config|
     sudo yum update
     sudo yum install -y ffmpeg
     curl -sL https://asciinema.org/install | sh
+
+    echo 46.231.133.231 koji.softwarefactory-project.io | sudo tee -a /etc/hosts
+
+    # some useful tools
+    sudo pip install virtualenvwrapper
   SHELL
 
   config.vm.provision "file", source: "~/.gitconfig", destination: "~/.gitconfig"
   config.vm.provision "file", source: "~/.vimrc", destination: "~/.vimrc"
+  config.vm.provision "file", source: "vagrant_sf.bashrc", destination: "~/.bashrc"
 end

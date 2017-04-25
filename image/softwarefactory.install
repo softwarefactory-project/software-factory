@@ -105,7 +105,6 @@ EOF
 
     if [ ! -f "${dir}/usr/bin/yum" ]; then
         rpm --root="${dir}" --import $(ls ${dir}/etc/pki/rpm-gpg/*.key | fgrep -v Debug)
-        # We cannot use install_packages since the basesystem isn't yet setup
         yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y basesystem yum shadow-utils
         echo "/dev/root / ext4 errors=remount-ro 0 1" > ${dir}/etc/fstab
         checkpoint "first bootstrap"
@@ -190,15 +189,10 @@ EOF
     do_chroot ${dir} bash -c 'for key in /etc/pki/rpm-gpg/*.key; do rpm --import $key; done'
 
     do_chroot ${dir} yum ${INSTALL_OPTIONS} group install -y "Minimal Install"
-
-    # git/patch/tmux/vim-enhanced needed for comfort
-    # python-flake8/python-nose needed for test_project_test
-    install_packages ${dir} sf-release grub2 git patch tmux vim-enhanced python-flake8 python-nose
 }
 
 install_serverspec() {
     if ! test -d ${dir}/usr/local/share/gems/gems/serverspec-${SERVERSPEC_VERSION}/lib/serverspec; then
-        install_packages ${dir} rubygems rubygem-rake
         retry do_chroot ${dir} gem install serverspec -v ${SERVERSPEC_VERSION}
     fi
 }

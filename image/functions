@@ -94,13 +94,6 @@ fake_shadow_utils() {
     done
 }
 
-install_packages() {
-    local chroot=$1
-    shift
-    local packages=$@
-    do_chroot $chroot yum ${INSTALL_OPTIONS} install -y $packages
-}
-
 remove_packages() {
     local chroot=$1
     shift

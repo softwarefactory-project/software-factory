@@ -144,7 +144,6 @@ class TestGateway(Base):
         url = config.GATEWAY_URL + "/jenkins/"
 
         # Without SSO cookie. Note that auth is no longer enforced
-
         resp = requests.get(url)
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('<title>Dashboard [Jenkins]</title>' in resp.text)
@@ -155,9 +154,6 @@ class TestGateway(Base):
                 auth_pubtkt=config.USERS[config.USER_1]['auth_cookie']))
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('<title>Dashboard [Jenkins]</title>' in resp.text)
-
-        # User should be known in Jenkins if logged in with SSO
-        self.assertTrue(config.USER_1 in resp.text)
 
     def test_kibana_accessible(self):
         """ Test if Kibana is accessible on gateway host

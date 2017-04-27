@@ -27,7 +27,6 @@ import config
 from utils import ManageSfUtils
 from utils import ResourcesUtils
 from utils import GerritGitUtils
-from utils import JenkinsUtils
 from utils import get_cookie
 from utils import is_present
 from utils import ssh_run_cmd
@@ -57,7 +56,6 @@ class SFProvisioner(object):
         self.ggu = GerritGitUtils(config.ADMIN_USER,
                                   config.ADMIN_PRIV_KEY_PATH,
                                   config.USERS[config.ADMIN_USER]['email'])
-        self.ju = JenkinsUtils()
         self.stb_client = SFStoryboard(
             config.GATEWAY_URL + "/storyboard_api",
             config.USERS[config.ADMIN_USER]['auth_cookie'])
@@ -110,11 +108,6 @@ class SFProvisioner(object):
             else:
                 issue = (random.randint(1,100), random.randint(1,100))
             yield issue, i['review']
-
-    def create_jenkins_jobs(self, name, jobnames):
-        print " Create Jenkins jobs(%s)  ..." % ",".join(jobnames)
-        for jobname in jobnames:
-            self.ju.create_job("%s_%s" % (name, jobname))
 
     def create_pads(self, amount):
         # TODO
@@ -192,8 +185,6 @@ class SFProvisioner(object):
                     print "Create review for bug %s in %s" % (
                         i, project['name'])
                     self.create_review_for_issue(project['name'], i)
-            self.create_jenkins_jobs(project['name'],
-                                     [j['name'] for j in project['jobnames']])
         self.create_resources()
         self.create_pads(2)
         self.create_pasties(2)

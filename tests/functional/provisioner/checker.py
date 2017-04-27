@@ -28,7 +28,6 @@ import config
 from utils import get_cookie
 from pysflib.sfgerrit import GerritUtils
 from utils import GerritGitUtils
-from utils import JenkinsUtils
 from utils import is_present
 from utils import ssh_run_cmd
 
@@ -53,7 +52,6 @@ class SFchecker:
         self.ggu = GerritGitUtils(config.ADMIN_USER,
                                   config.ADMIN_PRIV_KEY_PATH,
                                   config.USERS[config.ADMIN_USER]['email'])
-        self.ju = JenkinsUtils()
         self.stb_client = SFStoryboard(
             config.GATEWAY_URL + "/storyboard_api",
             config.USERS[config.ADMIN_USER]['auth_cookie'])
@@ -91,14 +89,6 @@ class SFchecker:
             print "FAIL: expected %s, project has %s" % (
                 len(issues), len(pt))
             exit(1)
-        print "OK"
-
-    def check_jenkins_jobs(self, name, jobnames):
-        print " Check that jenkins jobs(%s) exists ..." % ",".join(jobnames)
-        for jobname in jobnames:
-            if not '%s_%s' % (name, jobname) in self.ju.list_jobs():
-                print "FAIL"
-                exit(1)
         print "OK"
 
     def check_reviews_on_project(self, name, issues):
@@ -205,8 +195,6 @@ class SFchecker:
                 self.check_issues_on_project(project['name'],
                                              project['issues'])
             self.check_reviews_on_project(project['name'], project['issues'])
-            self.check_jenkins_jobs(project['name'],
-                                    [j['name'] for j in project['jobnames']])
         self.check_pads(2)
         self.check_pasties(2)
         for user in self.resources['local_users']:

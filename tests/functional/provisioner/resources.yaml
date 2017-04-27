@@ -111,9 +111,6 @@ projects:
    files:
     - name: file1
     - name: file2
-   jobnames:
-    - name: job1
-    - name: job2
  - name: dummy_project2
    issues:
     - name: Issue3
@@ -123,9 +120,6 @@ projects:
    files:
     - name: file3
     - name: file4
-   jobnames:
-    - name: job3
-    - name: job4
 etherpads:
  - name: pad1
  - name: pad2

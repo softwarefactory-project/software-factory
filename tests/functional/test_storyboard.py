@@ -199,7 +199,7 @@ class TestStoryboard(Base):
                "-i", config.SERVICE_PRIV_KEY_PATH,
                "-l", "root", config.GATEWAY_HOST,
                "grep -q 'Task .%s. was created.' /var/mail/root" % task_title]
-        for retries in xrange(10):
+        for retries in xrange(30):
             ret = subprocess.Popen(cmd).wait()
             if ret == 0:
                 break

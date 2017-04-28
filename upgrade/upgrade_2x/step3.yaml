@@ -1,4 +1,14 @@
 ---
+- hosts: all
+  tasks:
+  # This should avoid unexpected run of config-update
+  - name: Stop CI services before the upgrade step3
+    service: name={{ item }} state=stopped
+    with_items:
+      - zuul
+      - zuul-merger
+      - jenkins
+
 - hosts: install-server
   tasks:
   # Managesf database migration
@@ -24,23 +34,19 @@
   tasks:
   - include: tasks/remove_old_service_user.yml
 
-# Make sure no config-update job is running
-- hosts: jenkins
-  tasks:
-    - name: Wait for first config-update
-      when: "'repoxplorer' in roles"
-      wait_for:
-        path: /var/lib/jenkins/jobs/config-update/builds/lastStableBuild/log
-        search_regex: "^Finished. SUCCESS$"
-        timeout: 120
-
-- hosts: jenkins
-  tasks:
-  - include: tasks/submitconfigreview.yml
-
 - hosts: gerrit
   tasks:
   - include: tasks/allprojectsupdate.yml
-  - include: tasks/update_configrepo.yaml
-  - name: Propose replication.config in the config repo
-    shell: /usr/share/sf-config/scripts/propose_replication_config.sh
+
+- hosts: all
+  tasks:
+  - name: Start CI services after the upgrade step3
+    service: name={{ item }} state=started
+    with_items:
+      - zuul
+      - zuul-merger
+      - jenkins
+
+- hosts: install-server
+  tasks:
+  - include: tasks/submitconfigreview.yml

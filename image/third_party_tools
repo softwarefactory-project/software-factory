@@ -14,7 +14,7 @@ URL_LIST="$URL_LIST $RDO_REPO"
 SERVERSPEC_VERSION=2.25.0
 
 # Storyboard
-STORYBOARD_WEBCLIENT_COMMIT="28b4809"
+STORYBOARD_WEBCLIENT_COMMIT="707904d"
 
 if [ "${USE_SWIFT_CACHE}" == "yes" ]; then
     STORYBOARD_WEBCLIENT_EXTRA_VARS="storyboard_webclient_url: \"${SWIFT_CACHE}/storyboard-webclient/storyboard-webclient-${STORYBOARD_WEBCLIENT_COMMIT}.tar.gz\""

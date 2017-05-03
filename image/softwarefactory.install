@@ -191,17 +191,10 @@ EOF
     do_chroot ${dir} yum ${INSTALL_OPTIONS} group install -y "Minimal Install"
 }
 
-install_serverspec() {
-    if ! test -d ${dir}/usr/local/share/gems/gems/serverspec-${SERVERSPEC_VERSION}/lib/serverspec; then
-        retry do_chroot ${dir} gem install serverspec -v ${SERVERSPEC_VERSION}
-    fi
-}
-
 image_clean() {
     rm -Rf ${dir}/var/lib/software-factory/ansible/facts/*
     rm -Rf ${dir}/usr/share/info
     rm -Rf ${dir}/share ${dir}/usr/share/backgrounds
-    rm -Rf ${dir}/usr/local/share/gems/cache ${dir}/usr/local/share/gems/doc
     rm -Rf ${dir}/root/.cache ${dir}/root/.ansible
     rm -Rf ${dir}/root/.npm
     rm -Rf ${dir}/root/.gem

@@ -1,0 +1,5 @@
+---
+features:
+  - Nodepool image building log are now stored in
+    /var/www and accessible through http at
+    https://fqdn/nodepool-log.

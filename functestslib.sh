@@ -265,6 +265,7 @@ function get_logs {
     set +e
 
     # Run get_logs from install-server and copy resulting logs
+    rsync -avi ${SF_HOST}:/root/trace.log ${ARTIFACTS_DIR}/
     ssh ${SF_HOST} ansible-playbook /var/lib/software-factory/ansible/get_logs.yml &> ${ARTIFACTS_DIR}/get_logs.log && \
     rsync -avi ${SF_HOST}:sf-logs/ ${ARTIFACTS_DIR}/ &>> ${ARTIFACTS_DIR}/get_logs.log || {
         cat ${ARTIFACTS_DIR}/get_logs.log; echo "get_logs failed...";
@@ -494,6 +495,7 @@ function run_checker {
 function run_functional_tests {
     echo "$(date) ======= run_functional_tests"
     grep -q "firehose" ${REFARCH_FILE} && firehose_listen
+    ssh ${SF_HOST} "tcpdump -i lo -Z root -s 0 -A port 20000 > /root/trace.log" &
     nosetests --with-timer --with-xunit --logging-format "%(asctime)s: %(levelname)s - %(message)s" -s -v ${SF_TESTS} \
         && echo "Functional tests: SUCCESS" \
         || fail "Functional tests failed" ${ARTIFACTS_DIR}/functional-tests.debug

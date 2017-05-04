@@ -1,6 +1,8 @@
 #!/bin/sh
 #
 
+DONOTMERGE=1
+
 # Current SF version
 VER=2.5.0
 PREVIOUS_VER=2.4.0

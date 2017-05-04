@@ -105,7 +105,7 @@ EOF
 
     if [ ! -f "${dir}/usr/bin/yum" ]; then
         rpm --root="${dir}" --import $(ls ${dir}/etc/pki/rpm-gpg/*.key | fgrep -v Debug)
-        yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y basesystem yum shadow-utils grub2 grub2-tools
+        yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y basesystem yum shadow-utils
         echo "/dev/root / ext4 errors=remount-ro 0 1" > ${dir}/etc/fstab
         checkpoint "first bootstrap"
     fi
@@ -114,6 +114,7 @@ EOF
     cp -p ${ORIG}/edeploy/* ${dir}/usr/sbin/
     cp ${ORIG}/C7.0-ids.tables ${dir}/etc/ids.tables
     fake_shadow_utils
+    yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y grub2 grub2-tools
 
     [ -d "${dir}/var/lib/edeploy/${version}" ] || mkdir -p "${dir}/var/lib/edeploy/${version}"
 

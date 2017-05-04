@@ -105,7 +105,7 @@ EOF
 
     if [ ! -f "${dir}/usr/bin/yum" ]; then
         rpm --root="${dir}" --import $(ls ${dir}/etc/pki/rpm-gpg/*.key | fgrep -v Debug)
-        yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y basesystem yum shadow-utils
+        yum --disableplugin=* --installroot ${dir} ${INSTALL_OPTIONS} install -y basesystem yum shadow-utils grub2 grub2-tools
         echo "/dev/root / ext4 errors=remount-ro 0 1" > ${dir}/etc/fstab
         checkpoint "first bootstrap"
     fi

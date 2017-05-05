@@ -4,11 +4,11 @@
 - hosts: install-server
   tasks:
     - name: Submit and approve config change
-      command: chdir=/root/config /usr/share/sf-config/scripts/submit_and_wait.py --approve
+      command: chdir={{ config_path }} /usr/share/sf-config/scripts/submit_and_wait.py --approve
       register: submit_status
       ignore_errors: true
 
-    - command: chdir=/root/config cat .git/refs/heads/master
+    - command: chdir={{ config_path }} cat .git/refs/heads/master
       register: commitsha
 
 - hosts: jenkins

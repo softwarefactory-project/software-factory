@@ -20,14 +20,14 @@
 - hosts: install-server
   tasks:
     - name: "Check if image is already defined"
-      shell: "grep -q '{{ node }}' /root/config/nodepool/nodepool.yaml && grep -q '{{ base_image_name }}' /root/config/nodepool/nodepool.yaml"
+      shell: "grep -q '{{ node }}' {{ config_path }}/nodepool/nodepool.yaml && grep -q '{{ base_image_name }}' {{ config_path }}/nodepool/nodepool.yaml"
       register: sfconfiged
       failed_when: False
 
     - name: Adds nodepool providers
       when: sfconfiged.rc
       command: >
-        /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval providers "[{
+        /usr/share/sf-config/scripts/hieraedit.py --yaml {{ config_path }}/nodepool/nodepool.yaml --eval providers "[{
             'name': '{{ provider_name }}',
             'boot-timeout': 120,
             'clean-floating-ips': True,
@@ -49,7 +49,7 @@
     - name: Adds nodepool label
       when: sfconfiged.rc
       command: >
-        /usr/share/sf-config/scripts/hieraedit.py --yaml /root/config/nodepool/nodepool.yaml --eval labels "[{
+        /usr/share/sf-config/scripts/hieraedit.py --yaml {{ config_path }}/nodepool/nodepool.yaml --eval labels "[{
             'name': '{{ node }}',
             'image': '{{ image_name }}',
             'min-ready': 2,
@@ -58,7 +58,7 @@
 
     - name: Update change
       when: sfconfiged.rc
-      command: chdir=/root/config  {{ item }}
+      command: chdir={{ config_path }}  {{ item }}
       with_items:
           - 'git commit -a -m "Add {{ node }} label to {{ provider_name }} provider"'
       environment: {'EDITOR':'test'}

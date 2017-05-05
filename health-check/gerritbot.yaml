@@ -31,7 +31,7 @@
 - hosts: install-server
   tasks:
     - name: "Create fake config change"
-      command: chdir=/root/config {{ item }}
+      command: chdir={{ config_path }} {{ item }}
       with_items:
         # Use 'date' dynamic content to make sure a new change is created
         - bash -c "date '+%s' >> test_gerritbot_notif"
@@ -47,7 +47,7 @@
 - hosts: install-server
   tasks:
     - name: "Add gerritbot IRC channels with config-repo"
-      command: chdir=/root/config {{ item }}
+      command: chdir={{ config_path }} {{ item }}
       with_items:
         - git reset --hard HEAD^ # Remove test commit
         - cp /etc/gerritbot/channels.yaml gerritbot/channels.yaml
@@ -67,7 +67,7 @@
 - hosts: install-server
   tasks:
     - name: "Create fake config change"
-      command: chdir=/root/config {{ item }}
+      command: chdir={{ config_path }} {{ item }}
       with_items:
         # Use 'date' dynamic content to make sure a new change is created
         - bash -c "date '+%s' >> test_gerritbot_notif"

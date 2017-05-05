@@ -35,7 +35,7 @@ zuul.yaml
 
 playbooks/config_reset.yaml
 ---------
-* Reset /root/config checkout and update to origin/master
+* Reset {{ config_path }} checkout and update to origin/master
 
 playbooks/config_submit_change.yaml
 ---------

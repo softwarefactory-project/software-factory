@@ -80,6 +80,7 @@ case "${TEST_TYPE}" in
         lxc_poweroff
         lxc_start
         wait_boot_finished
+        run_health_base
         run_functional_tests
         if [ "${SF_TESTS}" != "tests/functional" ]; then
             exit 0
@@ -112,6 +113,7 @@ case "${TEST_TYPE}" in
         run_upgrade
         run_checker "checksum_warn_only"
         run_serverspec_tests
+        run_health_base
         run_functional_tests
         ;;
     "openstack")

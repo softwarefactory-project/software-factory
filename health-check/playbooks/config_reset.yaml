@@ -1,9 +1,12 @@
 ---
-# * Reset /root/config checkout and update to origin/master
+# * Reset {{ config_path }} checkout and update to origin/master
 - hosts: install-server
   tasks:
+    - name: Clone config repo
+      git: repo=http://{{ fqdn }}/r/config dest={{ config_path }} update=no
+
     - name: Reset config
-      command: chdir=/root/config {{ item }}
+      command: chdir={{ config_path }} {{ item }}
       with_items:
         - git fetch --all
         - git checkout master

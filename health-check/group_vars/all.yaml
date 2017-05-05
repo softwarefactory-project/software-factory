@@ -14,6 +14,7 @@ jobs: ["health-{name}-functional-tests", "health-{name}-unit-tests"]
 
 # Where projects are checkout on install-server
 project_path: "/var/lib/software-factory/health-check/{{ project }}"
+config_path: "/var/lib/software-factory/health-check/config"
 
 # Openstack access
 os_env:

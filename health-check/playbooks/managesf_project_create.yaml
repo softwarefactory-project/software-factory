@@ -25,11 +25,11 @@
 - hosts: install-server
   tasks:
     - name: Create project with the resources backend
-      template: src=../templates/project-resource.yaml.j2 dest=/root/config/resources/project-resource-{{ project }}.yaml
+      template: src=../templates/project-resource.yaml.j2 dest={{ config_path }}/resources/project-resource-{{ project }}.yaml
       when: p.stat.isdir is not defined
 
     - name: Commit change
-      command: chdir=/root/config  {{ item }}
+      command: chdir={{ config_path }}  {{ item }}
       with_items:
           - 'git add resources/project-resource-{{ project }}.yaml'
           - 'git commit -a -m "Add {{ project }} to resources"'

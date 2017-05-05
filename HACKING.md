@@ -1,6 +1,8 @@
 Software Factory coding guidelines
 ==================================
 
+<DO NOT MERGE>
+
 This is a list of good practices to fix and follow:
 
 # System

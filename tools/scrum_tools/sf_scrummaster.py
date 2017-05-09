@@ -202,36 +202,48 @@ class StoryboardManager(object):
         for task in self.client.worklists.get(lane_id).items:
             if task['archived']:
                 continue
-            t = self.client.tasks.get(task['item_id'])
-            if t.status.lower() != 'todo' or t.assignee_id is not None:
-                self.remove_from_lane(t, task['id'], lane_id)
+            try:
+                t = self.client.tasks.get(task['item_id'])
+                if t.status.lower() != 'todo' or t.assignee_id is not None:
+                    self.remove_from_lane(t, task['id'], lane_id)
+            except exceptions.NotFound:
+                print 'Error: Task "%s" not found' % task
         # Open Confirmed Bugs
         print "Clean confirmed bugs..."
         lane_id = self.board_lanes['Open Confirmed Bugs'].id
         for task in self.client.worklists.get(lane_id).items:
             if task['archived']:
                 continue
-            t = self.client.tasks.get(task['item_id'])
-            if not self.is_open_confirmed_bug(t):
-                self.remove_from_lane(t, task['id'], lane_id)
+            try:
+                t = self.client.tasks.get(task['item_id'])
+                if not self.is_open_confirmed_bug(t):
+                    self.remove_from_lane(t, task['id'], lane_id)
+            except exceptions.NotFound:
+                print 'Error: Task "%s" not found' % task
         # Blocked
         print "Clean blocked..."
         lane_id = self.board_lanes['Blocked'].id
         for task in self.client.worklists.get(lane_id).items:
             if task['archived']:
                 continue
-            t = self.client.tasks.get(task['item_id'])
-            if not self.is_blocked_task(t):
-                self.remove_from_lane(t, task['id'], lane_id)
+            try:
+                t = self.client.tasks.get(task['item_id'])
+                if not self.is_blocked_task(t):
+                    self.remove_from_lane(t, task['id'], lane_id)
+            except exceptions.NotFound:
+                print 'Error: Task "%s" not found' % task
         # Current Sprint
         print "Clean current sprint..."
         lane_id = self.board_lanes['Current Sprint'].id
         for task in self.client.worklists.get(lane_id).items:
             if task['archived']:
                 continue
-            t = self.client.tasks.get(task['item_id'])
-            if not self.is_current_sprint(t):
-                self.remove_from_lane(t, task['id'], lane_id)
+            try:
+                t = self.client.tasks.get(task['item_id'])
+                if not self.is_current_sprint(t):
+                    self.remove_from_lane(t, task['id'], lane_id)
+            except exceptions.NotFound:
+                print 'Error: Task "%s" not found' % task
 
     def update_boards(self):
         # TODO remove all items from worklists first

@@ -494,7 +494,7 @@ function run_checker {
 function run_functional_tests {
     echo "$(date) ======= run_functional_tests"
     grep -q "firehose" ${REFARCH_FILE} && firehose_listen
-    nosetests --with-timer --with-xunit --logging-format "%(asctime)s: %(levelname)s - %(message)s" -s -v ${SF_TESTS} \
+    nosetests --with-timer --with-xunit --logging-format "%(asctime)s: %(levelname)s - %(message)s" -s -v -x ${SF_TESTS} \
         && echo "Functional tests: SUCCESS" \
         || fail "Functional tests failed" ${ARTIFACTS_DIR}/functional-tests.debug
     grep -q "firehose" ${REFARCH_FILE} && firehose_check

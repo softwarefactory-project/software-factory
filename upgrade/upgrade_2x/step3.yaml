@@ -1,5 +1,13 @@
 ---
-- hosts: all
+- hosts: jenkins
+  tasks:
+  # This should avoid unexpected run of config-update
+  - name: Stop CI services before the upgrade step3
+    service: name={{ item }} state=stopped
+    with_items:
+      - jenkins
+
+- hosts: zuul
   tasks:
   # This should avoid unexpected run of config-update
   - name: Stop CI services before the upgrade step3
@@ -7,7 +15,6 @@
     with_items:
       - zuul
       - zuul-merger
-      - jenkins
 
 - hosts: install-server
   tasks:
@@ -38,13 +45,19 @@
   tasks:
   - include: tasks/allprojectsupdate.yml
 
-- hosts: all
+- hosts: zuul
   tasks:
   - name: Start CI services after the upgrade step3
     service: name={{ item }} state=started
     with_items:
       - zuul
       - zuul-merger
+
+- hosts: jenkins
+  tasks:
+  - name: Start CI services after the upgrade step3
+    service: name={{ item }} state=started
+    with_items:
       - jenkins
 
 - hosts: install-server

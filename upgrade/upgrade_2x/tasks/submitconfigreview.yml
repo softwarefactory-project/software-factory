@@ -7,5 +7,3 @@
 
 - name: Trigger upgrade config repo
   shell: /usr/share/sf-config/scripts/upgrade-config-repo.sh
-  # Temporary ignore errors because script fails when repoxplorer/README is present but no files changed
-  ignore_errors: yes

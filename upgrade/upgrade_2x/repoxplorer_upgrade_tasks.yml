@@ -5,22 +5,22 @@
   - name: Remove repoxplorer EL index
     command: curl -XDELETE "http://elasticsearch:9200/repoxplorer/"
 
-- hosts: repoxplorer
+- hosts: install-server
   tasks:
-  - name: Check repoxplorer version
-    command: rpm -q --queryformat '%{VERSION}' repoxplorer
-    register: repoxplorer_version
+  - name: Get SF version
+    shell: cat /etc/sf-release
+    register: sf_release
 
 - hosts: install-server
   tasks:
   - block:
 
     - name: "Remove repoXplorer previous configuration"
-      command: chdir=/root/config {{ item }}
+      shell: chdir=/root/config {{ item }}
       with_items:
         - git rm -r repoxplorer
         - mkdir repoxplorer
-        - touch repoxplorer/.placeholder
+        - echo "Here to place custom configuration for repoXplorer." > repoxplorer/README
         - git add repoxplorer
 
     - name: "Push repoxplorer directory in the config repo"
@@ -29,7 +29,7 @@
         - git commit -m "Update repoxplorer configuration"
         - git push git+ssh://{{ fqdn }}/config master
 
-    when: repoxplorer_version.stdout == '0.8.0'
+    when: sf_release.stdout == '2.5.0'
 
 - hosts: repoxplorer
   tasks:
@@ -38,7 +38,7 @@
     - name: "Remove old index files"
       command: rm -f /etc/repoxplorer/projects.yaml /etc/repoxplorer/idents.yaml
 
-    when: repoxplorer_version.stdout == '0.8.0'
+    when: sf_release.stdout == '2.5.0'
 
   - name: "Restart repoxplorer indexer"
     service: name=repoxplorer state=restarted

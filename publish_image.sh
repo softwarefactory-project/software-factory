@@ -16,7 +16,7 @@ function publish {
     cd $(dirname $SRC)
     echo "[+] Creating edeploy file of ${SRC}"
     (cd $IMG; sudo tar -c -p --use-compress-program=pigz --numeric-owner --xattrs --selinux -f ../${IMG_NAME}.tgz .)
-    for arch in $(ls ${ORIG}/config/refarch/*.yaml); do
+    for arch in $(ls ${ORIG}/refarch/*.yaml); do
         (cd ${ORIG}/deploy/heat; sudo ./deploy.py --arch ${arch} --output ${SRC}-${SF_VER}-$(basename $arch .yaml).hot render)
     done
     echo "[+] Creating manifest"

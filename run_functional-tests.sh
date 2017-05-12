@@ -98,15 +98,13 @@ case "${TEST_TYPE}" in
     "upgrade")
         SKIP_GPG=1 ./fetch_image.sh ${SF_PREVIOUS_VER} || fail "Could not fetch ${SF_PREVIOUS_VER}"
         # Use previous version arch, failback to current arch
-        git show ${PREVIOUS_VER}:config/refarch/allinone.yaml > ${ARTIFACTS_DIR}/upgrade_inital_arch.yaml || {
+        git show ${PREVIOUS_VER}:refarch/allinone.yaml > ${ARTIFACTS_DIR}/upgrade_inital_arch.yaml || {
             # When previous version isn't tagged yet, use current allinone arch
-            cp config/refarch/allinone.yaml ${ARTIFACTS_DIR}/upgrade_inital_arch.yaml
+            cp refarch/allinone.yaml ${ARTIFACTS_DIR}/upgrade_inital_arch.yaml
         }
         export REFARCH_FILE=${ARTIFACTS_DIR}/upgrade_inital_arch.yaml
         lxc_init ${SF_PREVIOUS_VER}
         run_bootstraps
-        # Remove this sleep after 2.4.0 release see : https://softwarefactory-project.io/r/#/c/6250/
-        sleep 20
         run_provisioner
         # Copy new arch
         scp refarch/allinone.yaml ${SF_HOST}:/etc/software-factory/arch.yaml

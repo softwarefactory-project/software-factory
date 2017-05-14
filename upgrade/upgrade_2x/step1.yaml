@@ -53,8 +53,35 @@
         - git commit -a -m "Update nodepool configuration"
         - git push git+ssh://gerrit/config master
     - file: path=/root/sf-nodepool-conf-migrator.py state=absent
-
     when: nodepool_elements.stat.exists == false
+
+  # Update conf
+  - include_vars: /etc/software-factory/sfconfig.yaml
+  - name: "Check for zuul-launcher config update jobs"
+    stat:
+      path: "{{install_path}}/softwarefactory/usr/share/sf-config/config-repo/jobs-zuul/_config.yaml"
+    register: zuul_launcher_config_update
+  - block:
+    - name: "Ensure jobs-zuul exists"
+      file: path=/root/config/jobs-zuul state=directory
+    - name: "Update config-repo files"
+      template:
+        src: "{{ item.src }}"
+        dest: "/root/config/{{ item.dest }}"
+      register: config_repo_status
+      with_items:
+        - { src: "{{install_path}}/softwarefactory/usr/share/sf-config/templates/_macros.yaml.j2", dest: jobs-zuul/_macros.yaml }
+        - { src: "{{install_path}}/softwarefactory/usr/share/sf-config/config-repo/jobs-zuul/_config.yaml",  dest: jobs-zuul/_config.yaml }
+        - { src: "{{install_path}}/softwarefactory/usr/share/sf-config/templates/_default_jobs.yaml.j2", dest: jobs/_default_jobs.yaml }
+        - { src: "{{install_path}}/softwarefactory/usr/share/sf-config/config-repo/zuul/_layout.yaml", dest: zuul/_layout.yaml }
+    - name: "Push config-repo updates"
+      command: chdir=/root/config {{ item }}
+      with_items:
+        - git add jobs-zuul/_macros.yaml jobs-zuul/_config.yaml
+        - git commit -a -m "Update default configuration"
+        - git push git+ssh://{{ fqdn }}/config master
+      when: config_repo_status|changed
+    when: zuul_launcher_config_update.stat.exists
 
 - hosts: all
   tasks:

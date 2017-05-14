@@ -77,7 +77,7 @@ class TestRepoxplorer(Base):
             config_clone_dir,
             "Add new resources for functional tests")
         config_update_log = self.ju.wait_for_config_update(change_sha)
-        self.assertIn("Finished: SUCCESS", config_update_log)
+        self.assertIn("SUCCESS", config_update_log)
 
     def get_projects(self):
         url = config.GATEWAY_URL + "/repoxplorer/projects.json/"

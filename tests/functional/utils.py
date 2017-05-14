@@ -447,9 +447,16 @@ class JenkinsUtils:
             return 0
 
     def get_last_console(self, job_name):
+        if os.environ.get("SF_JENKINS_EXECUTOR", "0") == "1":
+            console_url = "%s/job/%s/lastBuild/consoleText" % (
+                self.jenkins_url, job_name
+            )
+        else:
+            console_url = "%s/logs/results/%s/lastSuccessful" % (
+                config.GATEWAY_URL, job_name
+            )
         try:
-            return self.get("%s/job/%s/lastBuild/consoleText" % (
-                self.jenkins_url, job_name)).text
+            return self.get(console_url).text
         except:
             return ''
 
@@ -546,7 +553,7 @@ class ResourcesUtils():
         self.ggu.add_commit_for_all_new_additions(cdir, msg)
         change_sha = self.ggu.direct_push_branch(cdir, 'master')
         config_update_log = self.ju.wait_for_config_update(change_sha)
-        assert "Finished: SUCCESS" in config_update_log
+        assert "SUCCESS" in config_update_log
 
     def create_resources(self, name, data):
         cdir = self.ggu.clone(self.url, 'config', config_review=False)

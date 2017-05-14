@@ -95,7 +95,7 @@ class TestResourcesWorkflow(Base):
             config_clone_dir,
             "Add new resources for functional tests")
         config_update_log = self.ju.wait_for_config_update(change_sha)
-        self.assertIn("Finished: SUCCESS", config_update_log)
+        self.assertIn("SUCCESS", config_update_log)
 
     def wait_for_jenkins_note(self, change_id):
         attempt = 0
@@ -597,7 +597,7 @@ class TestResourcesWorkflow(Base):
         # If not True then we cannot concider config-update succeed
         config_update_log = self.ju.wait_for_config_update(revision)
         self.assertIn("Skip resources apply.", config_update_log)
-        self.assertIn("Finished: SUCCESS", config_update_log)
+        self.assertIn("SUCCESS", config_update_log)
         # Checking again missing resources  must return nothing
         ret = requests.get("%s/manage/resources/?get_missing_"
                            "resources=true" % config.GATEWAY_URL,

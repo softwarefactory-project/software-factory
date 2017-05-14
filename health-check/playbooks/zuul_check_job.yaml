@@ -1,0 +1,10 @@
+---
+# * Check if a zuul jobs exists
+- hosts: zuul
+  vars:
+    job_name: "{{ job|default ('config-update') }}"
+  tasks:
+    - name: "Check if check job is already defined"
+      shell: echo status | nc localhost 4730 | grep -q "build:{{ job_name }}:{{ node }}"
+      register: job_created_zuul
+      failed_when: job_created_zuul.rc != 0 and job_created_zuul.rc != 1 and job_created_zuul.rc != 2

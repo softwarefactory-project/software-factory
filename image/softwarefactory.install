@@ -293,6 +293,7 @@ build_all() {
     ansible_install sf-cauth "$CAUTH_EXTRA_VARS"
     ansible_install sf-lecm
     ansible_install sf-zuul
+    ansible_install sf-logserver
     ansible_install sf-lodgeit
     ansible_install sf-murmur
     ansible_install sf-etherpad "$ETHERPAD_EXTRA_VARS"

@@ -6,6 +6,12 @@
   # Remove unused users
   - user: name=murmur state=absent
   - group: name=murmur state=absent
+  # 2.6.0: keep sf-nodepool-conf-merger.py in /usr/local/bin
+  - copy:
+      src: /usr/share/sf-config/scripts/sf-nodepool-conf-merger.py
+      dest: /usr/local/bin/sf-nodepool-conf-merger.py
+      mode: 0555
+      remote_src: True
 
 - hosts: install-server
   tasks:

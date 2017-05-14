@@ -87,12 +87,18 @@ function clean_nodepool_tenant {
 
 function run_health_base {
     echo "[+] Starting the health base check"
-    echo "$(date) Running /etc/ansible/health-check/zuul.yaml" | tee -a ${ARTIFACTS_DIR}/integration_tests.txt
-    ssh ${SF_HOST} ansible-playbook /etc/ansible/health-check/zuul.yaml >> ${ARTIFACTS_DIR}/integration_tests.txt \
+    # Check for legacy config-update job
+    if ssh ${SF_HOST} test -f /etc/zuul/jobs/_config.yaml; then
+        HEALTH_EXTRA=""
+    else
+        HEALTH_EXTRA="-e 'config_update_log=/var/lib/jenkins/jobs/config-update/builds/lastStableBuild/build.xml jobs_host=jenkins'"
+    fi
+    echo "$(date) Running /etc/ansible/health-check/zuul.yaml" ${HEALTH_EXTRA} | tee -a ${ARTIFACTS_DIR}/integration_tests.txt
+    ssh ${SF_HOST} ansible-playbook /etc/ansible/health-check/zuul.yaml ${HEALTH_EXTRA} >> ${ARTIFACTS_DIR}/integration_tests.txt \
         && echo "Zuul integration test SUCCESS"                        \
         || fail "Zuul integration test failed" ${ARTIFACTS_DIR}/integration_tests.txt
-    echo "$(date) Running /etc/ansible/health-check/gerritbot.yaml" | tee -a ${ARTIFACTS_DIR}/integration_tests.txt
-    ssh ${SF_HOST} ansible-playbook /etc/ansible/health-check/gerritbot.yaml >> ${ARTIFACTS_DIR}/integration_tests.txt \
+    echo "$(date) Running /etc/ansible/health-check/gerritbot.yaml" ${HEALTH_EXTRA} | tee -a ${ARTIFACTS_DIR}/integration_tests.txt
+    ssh ${SF_HOST} ansible-playbook /etc/ansible/health-check/gerritbot.yaml ${HEALTH_EXTRA} >> ${ARTIFACTS_DIR}/integration_tests.txt \
         && echo "Gerritbot integration test SUCCESS"                        \
         || fail "Gerritbot integration test failed" ${ARTIFACTS_DIR}/integration_tests.txt
     checkpoint "run_health_base"
@@ -367,6 +373,11 @@ SCRIPT
         && echo "sfconfig.py: SUCCESS"  \
         || { kill -9 $SSH_AGENT_PID; fail "sfconfig.py failed" ${ARTIFACTS_DIR}/sfconfig.log; }
     kill -9 $SSH_AGENT_PID
+    if ssh ${SF_HOST} test -f /etc/zuul/jobs/_config.yaml; then
+        export SF_JENKINS_EXECUTOR=0
+    else
+        export SF_JENKINS_EXECUTOR=1
+    fi
     checkpoint "run_bootstraps"
     fetch_bootstraps_data
 }
@@ -468,7 +479,11 @@ function run_upgrade {
             ssh ${SF_HOST} "cd config; /usr/share/sf-config/scripts/submit_and_wait.py --debug --review-id $review_id --approve"
         ) || fail "Could not approve the auto generated config review"
     } || echo "No config review found"
-
+    if ssh ${SF_HOST} test -f /etc/zuul/jobs/_config.yaml; then
+        export SF_JENKINS_EXECUTOR=0
+    else
+        export SF_JENKINS_EXECUTOR=1
+    fi
     checkpoint "run_upgrade"
 }
 

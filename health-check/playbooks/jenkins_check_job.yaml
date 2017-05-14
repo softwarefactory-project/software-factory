@@ -5,5 +5,6 @@
     job_name: "{{ job|default ('config-update') }}"
   tasks:
     - name: "Check if check job is already created"
-      stat: path=/var/lib/jenkins/jobs/{{ job_name }}
-      register: job_created
+      command: ls -d "/var/lib/jenkins/jobs/{{ job_name }}"
+      register: job_created_jenkins
+      failed_when: job_created_jenkins.rc != 0 and job_created_jenkins.rc != 2

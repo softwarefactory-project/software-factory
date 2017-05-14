@@ -72,16 +72,6 @@ class TestJenkinsBasic(Base):
         super(TestJenkinsBasic, self).setUp()
         self.ju = JenkinsUtils()
 
-    def test_config_jobs_exist(self):
-        """ Test if jenkins config-update and config-check are created
-        """
-        url = '%s/job/config-check/' % self.ju.jenkins_url
-        resp = self.ju.get(url)
-        self.assertEquals(resp.status_code, 200)
-        url = '%s/job/config-update/' % self.ju.jenkins_url
-        resp = self.ju.get(url)
-        self.assertEquals(resp.status_code, 200)
-
     def test_sf_service_user_credentials(self):
         """Test if SF_SERVICE_USER's credentials are correctly added
         to the credentials store"""

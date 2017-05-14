@@ -1,10 +1,10 @@
 ---
 # * Check if a jenkins jobs exists
-- hosts: jenkins
+- hosts: zuul
   vars:
     job_name: "{{ job|default ('config-update') }}"
   tasks:
-    - name: "Check if check job is already created"
-      command: ls -d "/var/lib/jenkins/jobs/{{ job_name }}"
+    - name: "Check if check job is already defined"
+      shell: echo status | nc localhost 4730 | grep -q "build:{{ job_name }}:{{ node }}"
       register: job_created
       ignore_errors: yes

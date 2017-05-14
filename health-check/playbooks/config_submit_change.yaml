@@ -15,11 +15,11 @@
   tasks:
     - name: Check for config-update post job
       wait_for:
-        path: /var/lib/jenkins/jobs/config-update/builds/lastStableBuild/build.xml
+        path: "{{ config_update_log }}"
         search_regex: "{{ hostvars[groups['install-server'][0]]['commitsha'].stdout }}"
         timeout: 120
 
     - name: Check for SUCCESS config-update post job
       wait_for:
-        path: /var/lib/jenkins/jobs/config-update/builds/lastStableBuild/log
-        search_regex: "^Finished. SUCCESS$"
+        path: "{{ config_update_log }}"
+        search_regex: "SUCCESS"

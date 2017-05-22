@@ -1,4 +1,4 @@
 ---
 # Update All-Projects
 - name: Manage All-Projects config repo upgrade
-  shell: /root/gerrit-set-default-acl.sh upgrade
+  shell: "[ -f '/usr/share/sf-config/scripts/gerrit-set-default-acl.sh' ] && /usr/share/sf-config/scripts/gerrit-set-default-acl.sh upgrade || /root/gerrit-set-default-acl.sh upgrade"

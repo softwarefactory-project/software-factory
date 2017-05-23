@@ -13,11 +13,11 @@ inventory:
       - lodgeit
       - gerrit
       - gerritbot
-      - zuul
+      - zuul-server
       - zuul-merger
       - zuul-launcher
       - logserver
-      - nodepool
+      - nodepool-launcher
       - nodepool-builder
       - jenkins
       - murmur

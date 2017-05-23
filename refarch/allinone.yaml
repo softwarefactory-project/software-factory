@@ -13,7 +13,7 @@ inventory:
       - lodgeit
       - gerrit
       - gerritbot
-      - zuul
+      - zuul-server
       - zuul-merger
       - zuul-launcher
       - logserver

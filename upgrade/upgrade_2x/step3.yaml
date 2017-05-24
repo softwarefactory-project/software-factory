@@ -8,13 +8,8 @@
       - jenkins
 
 - hosts: zuul
-  tasks:
-  # This should avoid unexpected run of config-update
-  - name: Stop CI services before the upgrade step3
-    service: name={{ item }} state=stopped
-    with_items:
-      - zuul
-      - zuul-merger
+  roles:
+    - {name: "sf-zuul", action: "stop"}
 
 - hosts: install-server
   tasks:
@@ -50,7 +45,7 @@
   - name: Start CI services after the upgrade step3
     service: name={{ item }} state=started
     with_items:
-      - zuul
+      - zuul-server
       - zuul-merger
 
 - hosts: jenkins

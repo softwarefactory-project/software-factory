@@ -27,13 +27,15 @@
   - include: tasks/repoxplorer_configrepo.yml
 
 - hosts: zuul
-  tasks:
-  - service: name=zuul state=stopped
+  roles:
+    - {name: "sf-zuul", action: "stop"}
 
 - hosts: nodepool
   tasks:
   # Ignore errors when the service is not started...
-  - service: name=nodepool state=stopped
+  - service: name=nodepool state=stopped enabled=no
+    ignore_errors: yes
+  - yum: name=nodepoold state=absent
     ignore_errors: yes
 
 - hosts: install-server

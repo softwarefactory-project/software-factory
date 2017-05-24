@@ -41,10 +41,6 @@ describe file('/etc/zuul/layout.yaml') do
     }
 end
 
-describe service('zuul') do
-  it { should be_running }
-end
-
 describe service('zuul-merger') do
   it { should be_running }
 end

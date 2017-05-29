@@ -462,7 +462,7 @@ class JenkinsUtils:
 
     def wait_for_config_update(self, revision):
         job_text = "Updating configuration using %s" % revision
-        for retry in xrange(60):
+        for retry in xrange(120):
             time.sleep(1)
             job_log = self.get_last_console("config-update")
             if job_text in job_log and "Finished: " in job_log:

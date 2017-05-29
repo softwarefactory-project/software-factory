@@ -1,0 +1,8 @@
+host: firehose.openstack.org
+port: 1883
+filters:
+  nova_project:
+    topic: gerrit
+    change.project: ".*"
+    icon: heart_red
+    notification_message: "[%(change.project)s] - %(change.subject)s - %(author.username)s commented \"%(comment)s\" @ %(change.url)s"

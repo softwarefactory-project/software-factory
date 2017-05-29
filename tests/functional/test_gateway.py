@@ -1,5 +1,3 @@
-#!/bin/env python
-#
 # Copyright (C) 2014 eNovance SAS <licensing@enovance.com>
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -150,7 +148,7 @@ class TestGateway(Base):
 
         # Ensure jenkins cli is disabled
         resp = requests.get(url + "cli/")
-        self.assertEqual(resp.status_code, 503)
+        self.assertEqual(resp.status_code, 403)
 
         # With SSO cookie
         resp = requests.get(
@@ -159,15 +157,23 @@ class TestGateway(Base):
         self.assertEqual(resp.status_code, 200)
         self.assertTrue('<title>Dashboard [Jenkins]</title>' in resp.text)
 
-        # User shouldn't be known in Jenkins if logged in with SSO
-        self.assertTrue(config.USER_1 not in resp.text)
+        # User1 (admin ) be known in Jenkins if logged in with SSO
+        self.assertTrue(config.USER_1 in resp.text)
+
+        # With SSO cookie as normal unpriviledge user
+        resp = requests.get(
+            url, cookies=dict(
+                auth_pubtkt=config.USERS[config.USER_2]['auth_cookie']))
+        self.assertEqual(resp.status_code, 200)
+        self.assertTrue('<title>Dashboard [Jenkins]</title>' in resp.text)
+        self.assertTrue(config.USER_2 not in resp.text)
 
         # Ensure jenkins cli is disabled for SSO user
         resp = requests.get(
             url + "cli/",
             cookies=dict(
                 auth_pubtkt=config.USERS[config.USER_1]['auth_cookie']))
-        self.assertEqual(resp.status_code, 503)
+        self.assertEqual(resp.status_code, 403)
 
     def test_kibana_accessible(self):
         """ Test if Kibana is accessible on gateway host

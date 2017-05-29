@@ -1,0 +1,30 @@
+host: softwarefactory-project.io
+port: 1883
+filters:
+  my_patches_jenkins_happy:
+    topic: gerrit
+    change.owner.username: "mhuin"
+    comment: ".*Verified\\+.*"
+    icon: heart_green
+    notification_message: "[%(change.project)s] - %(change.subject)s - @ %(change.url)s"
+    notification_title: "CI build success"
+  my_patches_jenkins_frowny:
+    topic: gerrit
+    change.owner.username: "mhuin"
+    comment: ".*Verified-.*"
+    icon: "no"
+    notification_message: "[%(change.project)s] - %(change.subject)s - @ %(change.url)s"
+    notification_title: "CI build failure"
+  sf_patches_ci_ok:
+    topic: gerrit
+    comment: ".*Verified\\+.*"
+    change.project: "software-factory/.*"
+    icon: "yes"
+    notification_message: "[%(change.project)s] - %(change.subject)s - @ %(change.url)s"
+    notification_title: "Ready for review"
+  my_patches_new_comment:
+    topic: gerrit
+    change.owner.username: "mhuin"
+    icon: cog
+    notification_message: "[%(change.project)s] - %(change.subject)s - \"%(comment)s\" @ %(change.url)s"
+    notification_title: "New comment by %(author.username)s"

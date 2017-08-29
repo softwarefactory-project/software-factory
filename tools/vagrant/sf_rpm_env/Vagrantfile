@@ -29,7 +29,7 @@ Vagrant.configure(2) do |config|
     sudo yum install -y git git-review vim-enhanced tmux curl wget rpmdevtools createrepo mock python-jinja2 python-pip python-yaml python-crypto
     sudo /usr/sbin/usermod -a -G mock vagrant
     sudo pip install zuul
-    echo 46.231.133.231 koji.softwarefactory-project.io | sudo tee -a /etc/hosts
+    echo 38.145.34.53 koji.softwarefactory-project.io | sudo tee -a /etc/hosts
     # Install SF tooling
     git clone https://softwarefactory-project.io/r/config
     git clone https://softwarefactory-project.io/r/software-factory/sfinfo

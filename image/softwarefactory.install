@@ -156,7 +156,7 @@ enabled=0
 
 [sfmaster]
 name=SF master packages
-baseurl=http://46.231.133.231/kojifiles/repos/${SF_REPO}/
+baseurl=http://38.145.34.53/kojifiles/repos/${SF_REPO}/
 gpgcheck=0
 enabled=1
 EOF

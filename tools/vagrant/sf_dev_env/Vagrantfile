@@ -91,7 +91,7 @@ EOF); do
     sudo yum install -y ffmpeg
     curl -sL https://asciinema.org/install | sh
 
-    echo 46.231.133.231 koji.softwarefactory-project.io | sudo tee -a /etc/hosts
+    echo 38.145.34.53 koji.softwarefactory-project.io | sudo tee -a /etc/hosts
 
     # some useful tools
     sudo pip install virtualenvwrapper

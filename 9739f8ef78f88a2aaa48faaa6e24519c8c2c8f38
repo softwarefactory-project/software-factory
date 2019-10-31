@@ -1,0 +1,118 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e2c762a3_f8674624",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 1,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "I would have put instead \"Software Factoy - A Software development Forge based on Zuul\"",
+      "range": {
+        "startLine": 1,
+        "startChar": 0,
+        "endLine": 1,
+        "endChar": 43
+      },
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "dbc0fb79_105c980b",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 4,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "Instead :\n\nSoftware Factory is a software development forge. Software Factory provides an easy way to get everything you need to host, design, modify, test and build softwares; all of this pre-configured and usable immediately. It integrates several main components such as Zuul, Nodepool and Gerrit to provide powerful Continuous Integration and developement workflows.\n\nYou can also add a link to that blog article: https://www.softwarefactory-project.io/cicd-workflow-offered-by-zuulnodepool-on-software-factory.html",
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "860470a7_fc966806",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 6,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "https://www.softwarefactory-project.io",
+      "range": {
+        "startLine": 6,
+        "startChar": 0,
+        "endLine": 6,
+        "endChar": 35
+      },
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "5e037b36_2a86959f",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 7,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "Also you can link to the quick start https://www.softwarefactory-project.io/docs/3.3/operator/quickstart.html",
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "9ddf1f6f_149524b8",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 12,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "Also maybe: Follow our blog: https://www.softwarefactory-project.io/category/blog.html",
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "cd9547fc_f762fb6b",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-10-31T11:29:18Z",
+      "side": 1,
+      "message": "This link instead https://www.softwarefactory-project.io/docs/3.3/",
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    }
+  ]
+}

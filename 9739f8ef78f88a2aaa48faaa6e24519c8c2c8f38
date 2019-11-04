@@ -113,6 +113,24 @@
       "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
       "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
       "unresolved": false
+    },
+    {
+      "key": {
+        "uuid": "1946c5e8_1d8d7b98",
+        "filename": "README.md",
+        "patchSetId": 1
+      },
+      "lineNbr": 13,
+      "author": {
+        "id": 22
+      },
+      "writtenOn": "2019-11-04T14:03:35Z",
+      "side": 1,
+      "message": "I think we should not have 3.3 on the link to avoid to have to change this link for every release \u003d)",
+      "parentUuid": "cd9547fc_f762fb6b",
+      "revId": "9739f8ef78f88a2aaa48faaa6e24519c8c2c8f38",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
     }
   ]
 }

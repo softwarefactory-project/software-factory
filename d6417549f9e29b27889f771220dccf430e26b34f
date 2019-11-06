@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "9fe1589e_b49e0352",
+        "filename": ".zuul.yaml",
+        "patchSetId": 5
+      },
+      "lineNbr": 3,
+      "author": {
+        "id": 6
+      },
+      "writtenOn": "2019-11-06T14:41:59Z",
+      "side": 1,
+      "message": "You have an indentation problem. I think that\u0027s why zuul return such error (click on toogle CI)",
+      "revId": "d6417549f9e29b27889f771220dccf430e26b34f",
+      "serverId": "6c1dc8ef-8b94-40e4-bd83-c2359d45ecc0",
+      "unresolved": false
+    }
+  ]
+}
